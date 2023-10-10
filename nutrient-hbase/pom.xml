@@ -1,0 +1,94 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>io.github.icodegarden</groupId>
+		<artifactId>nutrient</artifactId>
+		<version>3.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>nutrient-hbase</artifactId>
+	<packaging>jar</packaging>
+
+	<name>${project.artifactId}</name>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<hbase.version>2.4.12</hbase.version>
+		<alihbase.version>2.8.7</alihbase.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.github.icodegarden</groupId>
+			<artifactId>nutrient-lang</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		
+		<!-- 原生hbase和alihabse存在个别的小冲突，需要2选1 -->
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-client</artifactId>
+			<version>${hbase.version}</version>
+			<optional>true</optional><!-- 可选 -->
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.hbase</groupId>
+		    <artifactId>hbase-endpoint</artifactId>
+		    <version>${hbase.version}</version>
+		    <optional>true</optional><!-- 可选 -->
+		</dependency>
+<!-- 		<dependency> -->
+<!-- 		    <groupId>org.apache.hbase</groupId> -->
+<!-- 		    <artifactId>hbase-mapreduce</artifactId> -->
+<!-- 		    <version>${hbase.version}</version> -->
+<!-- 			<optional>true</optional>可选 -->
+<!-- 		</dependency> -->
+		
+		<dependency>
+		  	<groupId>com.aliyun.hbase</groupId>
+		  	<artifactId>alihbase-client</artifactId>
+		  	<version>${alihbase.version}</version>
+		  	<optional>true</optional><!-- 可选 -->
+		</dependency>
+		<dependency>
+		    <groupId>com.aliyun.hbase</groupId>
+		    <artifactId>alihbase-endpoint</artifactId>
+		    <version>${alihbase.version}</version>
+		    <optional>true</optional><!-- 可选 -->
+		</dependency>
+		
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.9.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.19.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>5.7.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>

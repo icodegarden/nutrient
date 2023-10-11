@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.lang.endpoint;
+package io.github.icodegarden.nutrient.lang.lifecycle;
 
 import java.io.Closeable;
 

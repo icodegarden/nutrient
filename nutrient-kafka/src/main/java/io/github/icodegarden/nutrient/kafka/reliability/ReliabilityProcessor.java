@@ -2,7 +2,7 @@ package io.github.icodegarden.nutrient.kafka.reliability;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
-import io.github.icodegarden.nutrient.lang.TimeoutableCloseable;
+import io.github.icodegarden.nutrient.lang.lifecycle.TimeoutableCloseable;
 
 /**
  * 

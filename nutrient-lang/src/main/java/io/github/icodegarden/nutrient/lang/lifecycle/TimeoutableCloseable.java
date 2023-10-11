@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.lang;
+package io.github.icodegarden.nutrient.lang.lifecycle;
 
 import java.io.IOException;
 import java.time.Duration;

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.github.icodegarden.nutrient.lang.endpoint.GracefullyShutdown;
-import io.github.icodegarden.nutrient.lang.endpoint.GracefullyShutdown.Registry;
+import io.github.icodegarden.nutrient.lang.lifecycle.GracefullyShutdown;
+import io.github.icodegarden.nutrient.lang.lifecycle.GracefullyShutdown.Registry;
 
 /**
  * 

@@ -1,6 +1,6 @@
 package io.github.icodegarden.nutrient.lang.schedule;
 
-import io.github.icodegarden.nutrient.lang.endpoint.GracefullyShutdown;
+import io.github.icodegarden.nutrient.lang.lifecycle.GracefullyShutdown;
 
 /**
  * 

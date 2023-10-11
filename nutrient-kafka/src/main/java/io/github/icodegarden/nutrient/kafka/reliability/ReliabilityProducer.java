@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import io.github.icodegarden.nutrient.kafka.KafkaException;
-import io.github.icodegarden.nutrient.lang.TimeoutableCloseable;
+import io.github.icodegarden.nutrient.lang.lifecycle.TimeoutableCloseable;
 
 /**
  * 

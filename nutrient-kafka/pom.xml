@@ -29,13 +29,13 @@
 <!-- 		    <version>2.4.1</version> -->
 		    <version>3.1.0</version><!-- 可以兼容server 2.2.0 -->
 		</dependency>
+		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.2.3</version>
 			<optional>true</optional><!-- log的实现是可选的 -->
 		</dependency>		
-				
 				
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

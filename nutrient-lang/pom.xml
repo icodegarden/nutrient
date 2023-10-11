@@ -76,14 +76,12 @@
 		    <artifactId>apm-toolkit-trace</artifactId>
 		    <version>${skywalking.version}</version>
 		    <scope>provided</scope><!-- 由agent提供 -->
-		    <optional>true</optional><!-- 可选的 -->
 		</dependency>
 		<dependency>
 		    <groupId>com.alibaba.arms.apm</groupId>
 		    <artifactId>arms-sdk</artifactId>
 		    <version>${arms.version}</version>
 		    <scope>provided</scope><!-- 由agent提供 -->
-		    <optional>true</optional><!-- 可选的 -->
 		</dependency>
 		
 		<dependency>
@@ -95,14 +93,8 @@
 		    <groupId>io.projectreactor</groupId>
 		    <artifactId>reactor-core</artifactId>
 		    <version>${reactor.version}</version>
-		    <optional>true</optional><!-- 可选的 -->
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.github.pagehelper</groupId>-->
-<!--		    <artifactId>pagehelper</artifactId>-->
-<!--		    <version>${pagehelper.version}</version>-->
-<!--			<optional>true</optional> 可选的 -->
-<!--		</dependency>-->
+		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>

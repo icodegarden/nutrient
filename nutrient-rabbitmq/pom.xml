@@ -29,13 +29,13 @@
   			<artifactId>amqp-client</artifactId>
   			<version>5.18.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.2.3</version>
 			<optional>true</optional><!-- log的实现是可选的 -->
 		</dependency>		
-				
 				
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

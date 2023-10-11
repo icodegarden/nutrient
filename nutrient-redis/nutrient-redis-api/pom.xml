@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>io.github.icodegarden</groupId>
+		<artifactId>nutrient-redis</artifactId>
+		<version>3.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>nutrient-redis-api</artifactId>
+	<packaging>jar</packaging>
+
+	<name>${project.artifactId}</name>
+
+	<properties>
+		<java.version>1.8</java.version>
+		
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.github.icodegarden</groupId>
+			<artifactId>nutrient-lang</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.icodegarden</groupId>
+			<artifactId>nutrient-test</artifactId>
+			<version>3.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>4.3.2</version>
+			<optional>true</optional><!--可选的，二选一 -->
+		</dependency>
+		<dependency>
+        	<groupId>io.lettuce</groupId>
+  			<artifactId>lettuce-core</artifactId>
+<!--  			<version>6.1.5.RELEASE</version> -->
+ 			<version>6.2.4.RELEASE</version>
+ 			<optional>true</optional><!--可选的，二选一 -->
+        </dependency>
+		<dependency>
+            <groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+			<!--  不能高于2.6.2，否则相同代码pubsub收不到，可能spring有bug -->
+			<version>2.6.2</version><!-- 不能兼容jedis 4.0以上，因为内部依赖的GeoUnit类的package是不同的，可以与jedis3.8.0或lettuce-core搭配 -->
+            <optional>true</optional><!--可选的，需要jedis或lettuce -->
+        </dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.9.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.19.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>5.7.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>

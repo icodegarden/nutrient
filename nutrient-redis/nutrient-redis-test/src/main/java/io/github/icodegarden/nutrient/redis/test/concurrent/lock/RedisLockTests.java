@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.redis.concurrent.lock;
+package io.github.icodegarden.nutrient.redis.test.concurrent.lock;
 
 import io.github.icodegarden.nutrient.lang.concurrent.lock.DistributedLock;
 import io.github.icodegarden.nutrient.redis.RedisExecutor;

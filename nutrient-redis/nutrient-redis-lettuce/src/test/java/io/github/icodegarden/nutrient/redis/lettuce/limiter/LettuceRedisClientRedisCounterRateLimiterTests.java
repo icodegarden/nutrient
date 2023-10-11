@@ -3,7 +3,7 @@ package io.github.icodegarden.nutrient.redis.lettuce.limiter;
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClientRedisExecutor;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClientRedisExecutorTests;
-import io.github.icodegarden.nutrient.redis.limiter.RedisCounterRateLimiterTests;
+import io.github.icodegarden.nutrient.redis.test.limiter.RedisCounterRateLimiterTests;
 
 /**
  * 

@@ -3,8 +3,8 @@ package io.github.icodegarden.nutrient.redis.lettuce;
 import java.time.Duration;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.RedisExecutorTests;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClientRedisExecutor;
+import io.github.icodegarden.nutrient.redis.test.RedisExecutorTests;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 

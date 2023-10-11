@@ -3,7 +3,7 @@ package io.github.icodegarden.nutrient.redis.lettuce.sequence;
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClusterClientRedisExecutor;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClusterClientRedisExecutorTests;
-import io.github.icodegarden.nutrient.redis.sequence.RedisSequenceManagerTests;
+import io.github.icodegarden.nutrient.redis.test.sequence.RedisSequenceManagerTests;
 
 /**
  * 

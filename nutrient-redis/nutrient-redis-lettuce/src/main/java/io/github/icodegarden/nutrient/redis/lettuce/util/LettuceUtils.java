@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.redis.util;
+package io.github.icodegarden.nutrient.redis.lettuce.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

@@ -6,8 +6,8 @@ import java.util.Set;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.RedisExecutorTests;
 import io.github.icodegarden.nutrient.redis.jedis.JedisClusterRedisExecutor;
+import io.github.icodegarden.nutrient.redis.test.RedisExecutorTests;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;

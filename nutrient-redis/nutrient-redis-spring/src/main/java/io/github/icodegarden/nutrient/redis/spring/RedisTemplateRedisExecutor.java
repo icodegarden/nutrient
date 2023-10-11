@@ -96,8 +96,8 @@ import io.github.icodegarden.nutrient.redis.args.ZAggregateArgs;
 import io.github.icodegarden.nutrient.redis.args.GeoSearch.GeoPredicate;
 import io.github.icodegarden.nutrient.redis.args.GeoSearch.GeoRef;
 import io.github.icodegarden.nutrient.redis.args.XReadArgs.StreamOffset;
+import io.github.icodegarden.nutrient.redis.spring.util.RedisTemplateUtils;
 import io.github.icodegarden.nutrient.redis.util.EvalUtils;
-import io.github.icodegarden.nutrient.redis.util.RedisTemplateUtils;
 
 /**
  * 

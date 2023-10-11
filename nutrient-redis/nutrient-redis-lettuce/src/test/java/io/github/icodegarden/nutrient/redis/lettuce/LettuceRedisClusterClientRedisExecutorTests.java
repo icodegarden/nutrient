@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.Arrays;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.RedisExecutorTests;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClusterClientRedisExecutor;
+import io.github.icodegarden.nutrient.redis.test.RedisExecutorTests;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.cluster.RedisClusterClient;
 

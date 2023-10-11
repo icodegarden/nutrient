@@ -3,7 +3,7 @@ package io.github.icodegarden.nutrient.redis.jedis.limiter;
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
 import io.github.icodegarden.nutrient.redis.jedis.JedisPoolRedisExecutor;
 import io.github.icodegarden.nutrient.redis.jedis.JedisPoolRedisExecutorTests;
-import io.github.icodegarden.nutrient.redis.limiter.RedisCounterRateLimiterTests;
+import io.github.icodegarden.nutrient.redis.test.limiter.RedisCounterRateLimiterTests;
 
 /**
  * 

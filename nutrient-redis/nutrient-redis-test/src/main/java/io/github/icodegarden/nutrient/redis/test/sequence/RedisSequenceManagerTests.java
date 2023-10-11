@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.redis.sequence;
+package io.github.icodegarden.nutrient.redis.test.sequence;
 
 import io.github.icodegarden.nutrient.lang.sequence.SequenceManager;
 import io.github.icodegarden.nutrient.redis.RedisExecutor;

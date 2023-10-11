@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.redis;
+package io.github.icodegarden.nutrient.redis.test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,6 +16,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.github.icodegarden.nutrient.redis.RedisExecutor;
+import io.github.icodegarden.nutrient.redis.RedisPubSubListener;
 import io.github.icodegarden.nutrient.redis.args.BitCountOption;
 import io.github.icodegarden.nutrient.redis.args.BitFieldArgs;
 import io.github.icodegarden.nutrient.redis.args.BitFieldArgs.BitFieldType;

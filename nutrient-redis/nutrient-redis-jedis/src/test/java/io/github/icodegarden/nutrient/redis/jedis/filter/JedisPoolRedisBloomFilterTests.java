@@ -1,9 +1,9 @@
 package io.github.icodegarden.nutrient.redis.jedis.filter;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.filter.RedisBloomFilterTests;
 import io.github.icodegarden.nutrient.redis.jedis.JedisPoolRedisExecutor;
 import io.github.icodegarden.nutrient.redis.jedis.JedisPoolRedisExecutorTests;
+import io.github.icodegarden.nutrient.redis.test.filter.RedisBloomFilterTests;
 
 /**
  * 

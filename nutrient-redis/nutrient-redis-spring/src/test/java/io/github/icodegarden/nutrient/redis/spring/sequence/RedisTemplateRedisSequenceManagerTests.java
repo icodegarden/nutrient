@@ -1,9 +1,9 @@
 package io.github.icodegarden.nutrient.redis.spring.sequence;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.sequence.RedisSequenceManagerTests;
 import io.github.icodegarden.nutrient.redis.spring.RedisTemplateRedisExecutor;
 import io.github.icodegarden.nutrient.redis.spring.RedisTemplateRedisExecutorTests;
+import io.github.icodegarden.nutrient.redis.test.sequence.RedisSequenceManagerTests;
 
 /**
  * 

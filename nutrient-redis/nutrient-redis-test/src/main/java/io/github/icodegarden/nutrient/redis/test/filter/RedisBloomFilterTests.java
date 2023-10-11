@@ -1,9 +1,10 @@
-package io.github.icodegarden.nutrient.redis.filter;
+package io.github.icodegarden.nutrient.redis.test.filter;
 
 import org.junit.jupiter.api.BeforeEach;
 
 import io.github.icodegarden.nutrient.lang.filter.AbstractBloomFilter;
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
+import io.github.icodegarden.nutrient.redis.filter.RedisBloomFilter;
 import io.github.icodegarden.nutrient.test.filter.AbstractBloomFilterTests;
 
 /**

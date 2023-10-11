@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.redis.util;
+package io.github.icodegarden.nutrient.redis.spring.util;
 
 import java.util.LinkedList;
 import java.util.List;

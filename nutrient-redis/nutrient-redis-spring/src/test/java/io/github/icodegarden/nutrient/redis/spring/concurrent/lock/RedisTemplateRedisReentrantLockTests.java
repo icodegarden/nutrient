@@ -1,9 +1,9 @@
 package io.github.icodegarden.nutrient.redis.spring.concurrent.lock;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.concurrent.lock.RedisReentrantLockTests;
 import io.github.icodegarden.nutrient.redis.spring.RedisTemplateRedisExecutor;
 import io.github.icodegarden.nutrient.redis.spring.RedisTemplateRedisExecutorTests;
+import io.github.icodegarden.nutrient.redis.test.concurrent.lock.RedisReentrantLockTests;
 
 /**
  * 

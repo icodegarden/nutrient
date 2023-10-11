@@ -1,4 +1,4 @@
-package io.github.icodegarden.nutrient.redis.limiter;
+package io.github.icodegarden.nutrient.redis.test.limiter;
 
 import io.github.icodegarden.nutrient.lang.limiter.RateLimiter;
 import io.github.icodegarden.nutrient.redis.RedisExecutor;

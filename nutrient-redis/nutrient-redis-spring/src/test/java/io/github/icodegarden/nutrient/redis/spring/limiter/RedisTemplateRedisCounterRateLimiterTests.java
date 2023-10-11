@@ -1,9 +1,9 @@
 package io.github.icodegarden.nutrient.redis.spring.limiter;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.limiter.RedisCounterRateLimiterTests;
 import io.github.icodegarden.nutrient.redis.spring.RedisTemplateRedisExecutor;
 import io.github.icodegarden.nutrient.redis.spring.RedisTemplateRedisExecutorTests;
+import io.github.icodegarden.nutrient.redis.test.limiter.RedisCounterRateLimiterTests;
 
 /**
  * 

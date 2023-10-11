@@ -10,8 +10,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.RedisExecutorTests;
 import io.github.icodegarden.nutrient.redis.spring.RedisTemplateRedisExecutor;
+import io.github.icodegarden.nutrient.redis.test.RedisExecutorTests;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**

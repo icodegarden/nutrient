@@ -1,9 +1,9 @@
 package io.github.icodegarden.nutrient.redis.lettuce.filter;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.filter.RedisBloomFilterTests;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClientRedisExecutor;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClientRedisExecutorTests;
+import io.github.icodegarden.nutrient.redis.test.filter.RedisBloomFilterTests;
 
 /**
  * 

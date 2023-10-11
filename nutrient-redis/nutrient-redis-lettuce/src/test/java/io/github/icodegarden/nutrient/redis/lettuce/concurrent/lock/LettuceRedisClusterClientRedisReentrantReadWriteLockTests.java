@@ -1,11 +1,11 @@
 package io.github.icodegarden.nutrient.redis.lettuce.concurrent.lock;
 
 import io.github.icodegarden.nutrient.redis.RedisExecutor;
-import io.github.icodegarden.nutrient.redis.concurrent.lock.RedisReentrantReadWriteLockTests;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClientRedisExecutor;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClientRedisExecutorTests;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClusterClientRedisExecutor;
 import io.github.icodegarden.nutrient.redis.lettuce.LettuceRedisClusterClientRedisExecutorTests;
+import io.github.icodegarden.nutrient.redis.test.concurrent.lock.RedisReentrantReadWriteLockTests;
 
 /**
  * 

@@ -44,7 +44,6 @@
 		<mybatis.version>3.5.13</mybatis.version>
 		<pagehelper.version>5.3.3</pagehelper.version>
 		<pagehelper-spring-boot-starter.version>1.4.7</pagehelper-spring-boot-starter.version>
-		<wing.version>0.3.0</wing.version>
 		<skywalking.version>8.7.0</skywalking.version>
 		<arms.version>1.7.5</arms.version>
 		<netty.version>4.1.73.Final</netty.version>

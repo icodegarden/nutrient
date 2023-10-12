@@ -38,37 +38,6 @@
 		    <artifactId>netty-handler</artifactId>
 		    <version>${netty.version}</version>
 		</dependency>	
-		
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
-			<optional>true</optional><!-- log的实现是可选的 -->
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>3.8.0</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
-	
-	<dependencyManagement>
-		<dependencies>
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>5.7.1</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-		</dependencies>
-	</dependencyManagement>
 
 </project>

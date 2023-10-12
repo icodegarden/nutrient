@@ -45,9 +45,6 @@
 		<pagehelper.version>5.3.3</pagehelper.version>
 		<pagehelper-spring-boot-starter.version>1.4.7</pagehelper-spring-boot-starter.version>
 		<wing.version>0.3.0</wing.version>
-		<beecomb.version>1.1.0</beecomb.version>
-		<sentinel.version>1.8.5</sentinel.version>
-		<seata.version>1.6.1</seata.version>
 		<skywalking.version>8.7.0</skywalking.version>
 		<arms.version>1.7.5</arms.version>
 		<netty.version>4.1.73.Final</netty.version>
@@ -56,17 +53,56 @@
 
 	<modules>
 		<module>nutrient-lang</module>
-		<module>nutrient-mybatis</module>
+		<module>nutrient-designpattern</module>
+		<module>nutrient-elasticsearch</module>
 		<module>nutrient-exchange</module>
-		<module>nutrient-zookeeper</module>
+		<module>nutrient-hbase</module>
 		<module>nutrient-kafka</module>
+		<module>nutrient-mybatis</module>
 		<module>nutrient-nio</module>
 		<module>nutrient-redis</module>
 		<module>nutrient-shardingsphere</module>
-		<module>nutrient-hbase</module>
-		<module>nutrient-elasticsearch</module>
 		<module>nutrient-test</module>
+		<module>nutrient-zookeeper</module>
 	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.6</version>
+			<optional>true</optional><!-- 实现是可选的，为了test时有输出 -->
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.9.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.19.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>5.7.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<distributionManagement>
 		<snapshotRepository>

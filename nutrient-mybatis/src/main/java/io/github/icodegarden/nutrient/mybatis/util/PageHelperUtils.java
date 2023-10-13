@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 
 import io.github.icodegarden.nutrient.lang.query.BaseQuery;
 
@@ -15,6 +16,18 @@ import io.github.icodegarden.nutrient.lang.query.BaseQuery;
  */
 public abstract class PageHelperUtils {
 
+	public static <E> Page<E> startPage(int pageNum, int pageSize, boolean count) {
+		return startPage(pageNum, pageSize, count, null);
+	}
+
+	public static <E> Page<E> startPage(int pageNum, int pageSize, String orderBy) {
+		return startPage(pageNum, pageSize, true, orderBy);
+	}
+
+	public static <E> Page<E> startPage(int pageNum, int pageSize, boolean count, String orderBy) {
+		return PageHelper.startPage(pageNum, pageSize, count).setOrderBy(orderBy);
+	}
+	
 	/**
 	 * 只转换类型
 	 */

@@ -1,10 +1,11 @@
-package io.github.icodegarden.nutrient.zookeeper;
+package io.github.icodegarden.nutrient.zookeeper.sequence;
 
 import io.github.icodegarden.nutrient.lang.sequence.SequenceManager;
 import io.github.icodegarden.nutrient.test.sequence.SequenceManagerTests;
+import io.github.icodegarden.nutrient.zookeeper.PropertiesConfig;
 import io.github.icodegarden.nutrient.zookeeper.ZooKeeperHolder;
-import io.github.icodegarden.nutrient.zookeeper.ZooKeeperSequenceManager;
 import io.github.icodegarden.nutrient.zookeeper.ZooKeeperHolder.Config;
+import io.github.icodegarden.nutrient.zookeeper.sequence.ZooKeeperSequenceManager;
 
 /**
  * 

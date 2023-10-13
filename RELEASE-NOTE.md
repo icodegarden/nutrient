@@ -55,4 +55,6 @@
 * 增加RedisBloomFilter
 * 支持顺序消费OrderedReliabilityConsumer
 
-
+# 3.0.0
+* JDK17
+* 优化

@@ -1,5 +1,6 @@
 package io.github.icodegarden.nutrient.lang.util;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +11,10 @@ import java.util.regex.Pattern;
  */
 public class StringUtils {
 	private static final Pattern TPATTERN = Pattern.compile("[A-Z0-9]");
+	
+	public static String uuid() {
+		return UUID.randomUUID().toString().replace("-", "");
+	}
 
 	/**
 	 * 驼峰转xxx

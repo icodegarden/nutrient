@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class ZooKeeperInstanceRegistry implements InstanceRegistry<ZooKeeperRegi
 	private static final String IP = SystemUtils.getIp();
 
 	private ZooKeeperHolder zooKeeperHolder;
-//	private final String root;
+	private final String root;
 	private final String serviceName;
 	private final String bindIp;
 	private final int port;
@@ -84,6 +85,7 @@ public class ZooKeeperInstanceRegistry implements InstanceRegistry<ZooKeeperRegi
 			throw new IllegalArgumentException("param bindIp must not empty");
 		}
 		this.zooKeeperHolder = zooKeeperHolder;
+		this.root = root;
 		this.serviceName = serviceName;
 		this.bindIp = bindIp;
 		this.port = port;
@@ -122,6 +124,10 @@ public class ZooKeeperInstanceRegistry implements InstanceRegistry<ZooKeeperRegi
 //					String.format("node was registered [%s]", registered.get().getInstanceName()));
 		}
 
+		return doRegister();
+	}
+	
+	private ZooKeeperRegisteredInstance doRegister() throws ZooKeeperException {
 		String nodeName = path + "/" + bindIp + ":" + port + "-";
 		try {
 			if (log.isInfoEnabled()) {
@@ -136,6 +142,9 @@ public class ZooKeeperInstanceRegistry implements InstanceRegistry<ZooKeeperRegi
 				log.info("found node:{} was exists on register, do re register", nodeName);
 			}
 			// continue code ...
+		} catch (NoNodeException e) {
+			RegistryServiceNamePath.ensureServiceNamePath(zooKeeperHolder, root, serviceName);	
+			return doRegister();
 		} catch (KeeperException | InterruptedException e) {
 			throw new ExceedExpectedZooKeeperException(String.format("ex on register znode [%s]", nodeName), e);
 		}

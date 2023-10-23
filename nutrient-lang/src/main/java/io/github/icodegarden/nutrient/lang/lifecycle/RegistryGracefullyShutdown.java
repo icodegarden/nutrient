@@ -26,7 +26,7 @@ public class RegistryGracefullyShutdown implements GracefullyShutdown {
 
 	@Override
 	public String shutdownName() {
-		return "icodegarden-Registry";
+		return registry.getClass().getSimpleName() + "-Registry";
 	}
 
 	@Override

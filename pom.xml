@@ -11,7 +11,7 @@
 
 	<name>${project.artifactId}</name>
 	
-	<description>util codes</description>
+	<description>Including interface specifications, algorithm implementation, concurrency, distributed locks/re entry locks/read write locks, tools, etc</description>
 	<url>https://github.com/icodegarden/nutrient</url>
     <licenses>
         <license>

@@ -28,7 +28,7 @@ public class DataSourceGracefullyStartup implements GracefullyStartup {
 		 * 无损上线,利用getConnection促使连接池初始化完成
 		 */
 		if (dataSource != null) {
-			log.info("commons beans init DataSource pool of getConnection, datasource:{}", dataSource);
+			log.info("GracefullyStartup init DataSource pool of getConnection, datasource:{}", dataSource);
 
 			if (ClassUtils.isPresent(
 					"io.github.icodegarden.nutrient.shardingsphere.builder.DataSourceOnlyApiShardingSphereBuilder",

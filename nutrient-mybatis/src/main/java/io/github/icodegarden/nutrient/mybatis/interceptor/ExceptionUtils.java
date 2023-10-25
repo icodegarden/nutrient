@@ -9,8 +9,8 @@ class ExceptionUtils {
 	 * @param t   异常信息
 	 * @return 返回异常
 	 */
-	public static CommonsMybatisException mpe(String msg, Throwable t, Object... params) {
-		return new CommonsMybatisException(StringUtils.format(msg, params), t);
+	public static NutrientMybatisException mpe(String msg, Throwable t, Object... params) {
+		return new NutrientMybatisException(StringUtils.format(msg, params), t);
 	}
 
 	/**
@@ -19,8 +19,8 @@ class ExceptionUtils {
 	 * @param msg 消息
 	 * @return 返回异常
 	 */
-	public static CommonsMybatisException mpe(String msg, Object... params) {
-		return new CommonsMybatisException(StringUtils.format(msg, params));
+	public static NutrientMybatisException mpe(String msg, Object... params) {
+		return new NutrientMybatisException(StringUtils.format(msg, params));
 	}
 
 	/**
@@ -29,8 +29,8 @@ class ExceptionUtils {
 	 * @param t 异常
 	 * @return 返回异常
 	 */
-	public static CommonsMybatisException mpe(Throwable t) {
-		return new CommonsMybatisException(t);
+	public static NutrientMybatisException mpe(Throwable t) {
+		return new NutrientMybatisException(t);
 	}
 
 }

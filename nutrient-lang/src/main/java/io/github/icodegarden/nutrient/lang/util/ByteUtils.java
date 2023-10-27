@@ -16,6 +16,23 @@ public class ByteUtils {
 	public static boolean bytesToBoolean(byte[] bytes) {
 		return bytes[0] == 0x01;
 	}
+	
+	public static byte[] charToBytes(char c) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+
+		byteBuffer.putChar(c);
+
+		return byteBuffer.array();
+	}
+
+	public static char bytesToChar(byte[] bytes) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+
+		byteBuffer.put(bytes);
+
+		byteBuffer.flip();
+		return byteBuffer.getChar();
+	}
 
 	public static byte[] shortToBytes(short s) {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(2);

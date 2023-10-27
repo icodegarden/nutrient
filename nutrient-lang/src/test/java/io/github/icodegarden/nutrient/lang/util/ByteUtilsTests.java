@@ -23,6 +23,17 @@ class ByteUtilsTests {
 	}
 
 	@Test
+	void charToBytes() throws Exception {
+		byte[] bs = ByteUtils.charToBytes(Character.MAX_VALUE);
+		assertThat(bs).isNotNull();
+		assertThat(ByteUtils.bytesToChar(bs)).isEqualTo(Character.MAX_VALUE);
+
+		bs = ByteUtils.charToBytes(Character.MIN_VALUE);
+		assertThat(bs).isNotNull();
+		assertThat(ByteUtils.bytesToChar(bs)).isEqualTo(Character.MIN_VALUE);
+	}
+	
+	@Test
 	void shortToBytes() throws Exception {
 		byte[] bs = ByteUtils.shortToBytes(Short.MAX_VALUE);
 		assertThat(bs).isNotNull();

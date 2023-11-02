@@ -10,7 +10,7 @@ import reactor.core.scheduler.Schedulers;
  * @author Fangfang.Xu
  *
  */
-public abstract class ReactorUtils {
+public abstract class ReactiveUtils {
 
 	public static <T> T block(Mono<T> mono) {
 		AtomicReference<Throwable> referenceE = new AtomicReference<>();

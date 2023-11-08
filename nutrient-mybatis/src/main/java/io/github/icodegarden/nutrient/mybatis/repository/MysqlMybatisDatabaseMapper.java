@@ -15,7 +15,7 @@ import io.github.icodegarden.nutrient.lang.repository.OptimizeTableResults;
  *
  */
 @Mapper
-public interface MysqlMybatisDatabase extends MybatisDatabase {
+public interface MysqlMybatisDatabaseMapper extends MybatisDatabase {
 
 	@Select("<script> select version() as version </script>")
 	@Override

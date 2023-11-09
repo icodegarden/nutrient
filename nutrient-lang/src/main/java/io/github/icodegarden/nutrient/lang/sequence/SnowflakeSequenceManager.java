@@ -10,9 +10,12 @@ public class SnowflakeSequenceManager implements SequenceManager {
 	private final static long START_STMP = 1288834974657L;
 //    private final static long START_STMP = 1480166465631L;
 
-	private final static long SEQUENCE_BIT = 12; // 序列号占用的位数
-	private final static long MACHINE_BIT = 5; // 机器标识占用的位数
-	private final static long DATACENTER_BIT = 5;// 数据中心占用的位数
+	/**
+	 * 以下3项不是final，可以视情况调整参数，例如把SEQUENCE_BIT=10，MACHINE_BIT=6，DATACENTER_BIT=6来增加支持的实例数，但降低每个实例每毫秒产生的数量
+	 */
+	private static long SEQUENCE_BIT = 12; // 序列号占用的位数 默认每个实例1毫秒可产生4096个
+	private static long DATACENTER_BIT = 5;// 数据中心占用的位数，默认0-31
+	private static long MACHINE_BIT = 5; // 机器标识占用的位数，默认0-31
 
 	private final static long MAX_DATACENTER_NUM = -1L ^ (-1L << DATACENTER_BIT);
 	private final static long MAX_MACHINE_NUM = -1L ^ (-1L << MACHINE_BIT);
@@ -40,6 +43,18 @@ public class SnowflakeSequenceManager implements SequenceManager {
 		this.machineId = machineId;
 	}
 
+//	0 1 2 3 ... 31
+//	32 33 34 ... 63
+//	64 65 66 ... 95
+//	96 97 98 ... 127
+	public static long extractDatacenterId(long value) {
+		return value / (1 << DATACENTER_BIT);
+	}
+
+	public static long extractMachineId(long value) {
+		return value % (1 << MACHINE_BIT);
+	}
+
 	@Override
 	public long currentId() {
 		if (currentId == -1) {
@@ -65,7 +80,7 @@ public class SnowflakeSequenceManager implements SequenceManager {
 		}
 
 		lastStmp = currStmp;
-		
+
 		currentId = (currStmp - START_STMP) << TIMESTMP_LEFT | datacenterId << DATACENTER_LEFT
 				| machineId << MACHINE_LEFT | sequence;
 		return currentId;

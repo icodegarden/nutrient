@@ -13,7 +13,7 @@ import io.github.icodegarden.nutrient.lang.registry.DatabaseRegistry;
 import io.github.icodegarden.nutrient.lang.registry.Registration;
 import io.github.icodegarden.nutrient.lang.registry.Registry;
 import io.github.icodegarden.nutrient.lang.registry.RegistryListener;
-import io.github.icodegarden.nutrient.lang.registry.RegistryMaxIndexException;
+import io.github.icodegarden.nutrient.lang.registry.OutofMaxIndexRegistryException;
 
 /**
  * 
@@ -176,7 +176,7 @@ public abstract class RegistryTests {
 			registry.register(registration);
 		}
 
-		Assertions.assertThatExceptionOfType(RegistryMaxIndexException.class).isThrownBy(() -> {
+		Assertions.assertThatExceptionOfType(OutofMaxIndexRegistryException.class).isThrownBy(() -> {
 			Registration registration = new Registration.Default(name, UUID.randomUUID().toString(), 30L, metadata,
 					info);
 			registry.register(registration);
@@ -189,7 +189,7 @@ public abstract class RegistryTests {
 					info);
 			registry.register(registration);
 		}
-		Assertions.assertThatExceptionOfType(RegistryMaxIndexException.class).isThrownBy(() -> {
+		Assertions.assertThatExceptionOfType(OutofMaxIndexRegistryException.class).isThrownBy(() -> {
 			Registration registration = new Registration.Default(name2, UUID.randomUUID().toString(), 30L, metadata,
 					info);
 			registry.register(registration);

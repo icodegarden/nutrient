@@ -8,7 +8,7 @@ package io.github.icodegarden.nutrient.lang.registry;
  */
 public interface Registry<R extends Registration> extends Discovery<Registration> {
 
-	void register(R registration) throws RegistryException;
+	RegisterResult register(R registration) throws RegistryException;
 
 	void deregister(R registration) throws RegistryException;
 

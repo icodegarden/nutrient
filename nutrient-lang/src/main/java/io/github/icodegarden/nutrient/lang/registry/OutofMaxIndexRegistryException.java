@@ -5,10 +5,10 @@ package io.github.icodegarden.nutrient.lang.registry;
  * @author Fangfang.Xu
  *
  */
-public class RegistryTimeoutException extends RegistryException {
+public class OutofMaxIndexRegistryException extends RegistryException {
 	private static final long serialVersionUID = 1L;
 
-	public RegistryTimeoutException(String message) {
+	public OutofMaxIndexRegistryException(String message) {
 		super(message);
 	}
 }

@@ -67,7 +67,7 @@ public abstract class DatabaseRegistry<ID> implements Registry<Registration> {
 	protected abstract DistributedLock getRegisterLock(String name, Long expireSeconds);
 
 	@Override
-	public void register(Registration registration) throws RegistryException {
+	public RegisterResult register(Registration registration) throws RegistryException {
 		if (registration.getExpireSeconds() < minExpireSeconds) {
 			throw new IllegalArgumentException("expireSeconds must gte " + minExpireSeconds);
 		}
@@ -82,7 +82,7 @@ public abstract class DatabaseRegistry<ID> implements Registry<Registration> {
 					: null;
 			String info = registration.getInfo() != null ? JsonUtils.serialize(registration.getInfo()) : null;
 			registryRepository.updateRegistration(one.getId(), metadata, info);
-			return;
+			return new RegisterResult(one.getIndex());
 		}
 
 		DistributedLock lock = getRegisterLock("DatabaseRegistry-" + registration.getName(), 30L);
@@ -100,6 +100,8 @@ public abstract class DatabaseRegistry<ID> implements Registry<Registration> {
 					listener.onRegistered(registration, one.getIndex());
 
 					scheduleUpdateLease(registration);
+					
+					return new RegisterResult(one.getIndex());
 				} else {
 					/*
 					 * 否则查询最后一条，如果不存在或序号未满，则允许注册，否则满了
@@ -113,8 +115,10 @@ public abstract class DatabaseRegistry<ID> implements Registry<Registration> {
 						listener.onRegistered(registration, index);
 
 						scheduleUpdateLease(registration);
+						
+						return new RegisterResult(index);
 					} else {
-						throw new RegistryMaxIndexException(String.format("index of %s is gte maxIndex of %d",
+						throw new OutofMaxIndexRegistryException(String.format("index of %s is gte maxIndex of %d",
 								registration.getName(), maxIndexPerName));
 					}
 				}
@@ -122,7 +126,7 @@ public abstract class DatabaseRegistry<ID> implements Registry<Registration> {
 				lock.release();
 			}
 		} else {
-			throw new RegistryTimeoutException("Lock Acquire Timeout " + lockAcquireTimeoutMillis + "ms.");
+			throw new RegisterTimeoutRegistryException("Lock Acquire Timeout " + lockAcquireTimeoutMillis + "ms.");
 		}
 	}
 

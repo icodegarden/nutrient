@@ -42,7 +42,7 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 
 	private SocketChannel socketChannel;
 
-	private Heartbeat heartbeat;
+	private NioClientHeartbeat heartbeat;
 
 	private final InetSocketAddress address;
 
@@ -182,7 +182,8 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 			if (log.isWarnEnabled()) {
 				log.warn("client channel was closed, may be client disconnect or server was Not Available");
 			}
-			//reconnect(); 是否重连交给ReconnectTimerTask
+			//reconnect(); 
+			heartbeat.markReconnect();//重连时机交给ReconnectTimerTask
 		} catch (IOException e) {
 			/**
 			 * IMPT 通常由于server主动关闭，客户端要close自己，后续NioClientPool就能够在获取连接时识别已关闭并移除

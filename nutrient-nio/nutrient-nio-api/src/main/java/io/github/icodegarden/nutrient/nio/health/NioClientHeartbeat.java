@@ -22,8 +22,9 @@ public class NioClientHeartbeat implements Heartbeat {
 	private final Channel channel;
 	private long lastSend = System.currentTimeMillis();
 	private long lastReceive = System.currentTimeMillis();
+	private boolean reconnectMark;
 
-	public NioClientHeartbeat(String name, NioClient nioClient,Channel channel) {
+	public NioClientHeartbeat(String name, NioClient nioClient, Channel channel) {
 		this.name = name;
 		this.nioClient = nioClient;
 		this.channel = channel;
@@ -38,7 +39,7 @@ public class NioClientHeartbeat implements Heartbeat {
 		channel.write(message);
 		lastSend = System.currentTimeMillis();
 	}
-	
+
 	public void refreshLastSend() {
 		lastSend = System.currentTimeMillis();
 	}
@@ -72,6 +73,18 @@ public class NioClientHeartbeat implements Heartbeat {
 	public long lastReceive() {
 		return lastReceive;
 	}
+	
+	public void markReconnect() {
+		this.reconnectMark = true;
+	}
+
+	@Override
+	public boolean shouldReconnect(long heartbeatIntervalMillis) {
+		if (reconnectMark) {
+			return true;
+		}
+		return Heartbeat.super.shouldReconnect(heartbeatIntervalMillis);
+	}
 
 	@Override
 	public void close() throws IOException {
@@ -81,6 +94,8 @@ public class NioClientHeartbeat implements Heartbeat {
 	@Override
 	public void reconnect() throws IOException {
 		nioClient.reconnect();
+		
+		reconnectMark = false;
 	}
 
 	@Override

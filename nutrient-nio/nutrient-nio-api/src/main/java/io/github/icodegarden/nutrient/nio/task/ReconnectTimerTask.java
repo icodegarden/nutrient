@@ -41,20 +41,7 @@ public class ReconnectTimerTask {
 				"ReconnectTimerTask-" + heartbeat.toString(), scheduledThreadPoolExecutor) {
 			@Override
 			public void run() {
-				boolean shouldReconnect = false;
-				long lastReceive = heartbeat.lastReceive();
-				if (heartbeat.isClosed()) {
-					if (log.isInfoEnabled()) {
-						log.info("client heartbeat:{} was closed,reconnect...", heartbeat);
-					}
-					shouldReconnect = true;
-				} else if ((System.currentTimeMillis() - lastReceive) >= (heartbeatIntervalMillis * 3)) {
-					if (log.isInfoEnabled()) {
-						log.info("client heartbeat:{} lastReceive was timeout:{},reconnect...", heartbeat,
-								heartbeatIntervalMillis * 3);
-					}
-					shouldReconnect = true;
-				}
+				boolean shouldReconnect = heartbeat.shouldReconnect(heartbeatIntervalMillis);
 
 				if (shouldReconnect) {
 					try {

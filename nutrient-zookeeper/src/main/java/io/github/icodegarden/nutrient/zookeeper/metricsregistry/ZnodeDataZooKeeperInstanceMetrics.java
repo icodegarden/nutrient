@@ -1,8 +1,12 @@
 package io.github.icodegarden.nutrient.zookeeper.metricsregistry;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.zookeeper.CreateMode;
@@ -12,12 +16,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.icodegarden.nutrient.lang.metricsregistry.Metrics;
+import io.github.icodegarden.nutrient.lang.metricsregistry.Metrics.Dimension;
+import io.github.icodegarden.nutrient.lang.metricsregistry.Metrics.DimensionName;
 import io.github.icodegarden.nutrient.lang.metricsregistry.RegisteredInstance;
 import io.github.icodegarden.nutrient.lang.serialization.Deserializer;
 import io.github.icodegarden.nutrient.lang.serialization.Hessian2Deserializer;
 import io.github.icodegarden.nutrient.lang.serialization.Hessian2Serializer;
-import io.github.icodegarden.nutrient.lang.serialization.KryoDeserializer;
+import io.github.icodegarden.nutrient.lang.serialization.SerializationException;
 import io.github.icodegarden.nutrient.lang.serialization.Serializer;
+import io.github.icodegarden.nutrient.lang.util.JsonUtils;
 import io.github.icodegarden.nutrient.zookeeper.ACLs;
 import io.github.icodegarden.nutrient.zookeeper.ZooKeeperHolder;
 import io.github.icodegarden.nutrient.zookeeper.exception.ExceedExpectedZooKeeperException;
@@ -37,11 +44,6 @@ public class ZnodeDataZooKeeperInstanceMetrics implements ZooKeeperInstanceMetri
 
 	private Serializer<Object> serializer = new Hessian2Serializer();
 	private Deserializer<Object> deserializer = new Hessian2Deserializer();
-
-	/**
-	 * TODO remove
-	 */
-	private Deserializer<Object> deserializerFallback = new KryoDeserializer();
 
 	/**
 	 * 
@@ -159,9 +161,41 @@ public class ZnodeDataZooKeeperInstanceMetrics implements ZooKeeperInstanceMetri
 		Metrics metrics;
 		try {
 			metrics = (Metrics) deserializer.deserialize(data);
-		} catch (Exception e) {
-			metrics = (Metrics) deserializerFallback.deserialize(data);
+		} catch (SerializationException e) {
+			/**
+			 * 序列化不兼容，虚构
+			 */
+			List<Dimension> dimensions = new LinkedList<Dimension>();
+			/*
+			 * cpu使用率，1.0表示100%
+			 */
+			double cpuMax = 1.0;
+			int cpuWeight = 0;// 权重0表示不使用
+			Dimension cpuD = new Metrics.Dimension(DimensionName.Cpu, cpuMax, 0, cpuWeight);
+			dimensions.add(cpuD);
+
+			/*
+			 * 单位MB
+			 */
+			double memoryMax = 1 * 1024 * 1024 * 1024;
+			int memoryWeight = 0;// 权重0表示不使用
+			Dimension memoryD = new Metrics.Dimension(DimensionName.Memory, memoryMax, 0, memoryWeight);
+			dimensions.add(memoryD);
+
+			/*
+			 * jobs
+			 */
+			Dimension jobsD = new Metrics.Dimension(DimensionName.Jobs, 1000, 0, 1);
+			dimensions.add(jobsD);
+
+			Map<String, Serializable> descMap = new HashMap<String, Serializable>();
+			descMap.put("cpuCores", 1);
+			descMap.put("physicalMemory", memoryMax);
+
+			metrics = new Metrics(dimensions);
+			metrics.setDesc(JsonUtils.serialize(descMap));
 		}
+
 		metrics.setInstanceName(instanceName);
 		return metrics;
 	}

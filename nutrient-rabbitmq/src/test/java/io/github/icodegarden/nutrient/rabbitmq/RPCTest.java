@@ -48,7 +48,6 @@ public class RPCTest {
 							try {
 								Thread.sleep(2000);
 							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						} finally {
@@ -62,7 +61,6 @@ public class RPCTest {
 									this.notify();
 								}
 							} catch (IOException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}

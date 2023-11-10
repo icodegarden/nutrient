@@ -2,11 +2,10 @@ package io.github.icodegarden.nutrient.nio.task;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.atomic.AtomicLong;
 
 import io.github.icodegarden.nutrient.nio.health.Heartbeat;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 服务端检测。heartbeat*3检测一次,超时没有来自客户端的心跳，则触发关闭
@@ -14,8 +13,10 @@ import io.github.icodegarden.nutrient.nio.health.Heartbeat;
  * @author Fangfang.Xu
  *
  */
+@Slf4j
 public class IdleStateTimerTask {
-	private static Logger log = LoggerFactory.getLogger(IdleStateTimerTask.class);
+
+	private AtomicLong counter = new AtomicLong();
 
 	private long heartbeatIntervalMillis;
 	private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = TimerTaskThreadPools
@@ -32,21 +33,31 @@ public class IdleStateTimerTask {
 				"IdleStateTimerTask-" + heartbeat.toString(), scheduledThreadPoolExecutor) {
 			@Override
 			public void run() {
-				long lastReceive = heartbeat.lastReceive();
-				if (log.isDebugEnabled()) {
-					log.debug("IdleStateTimerTask of heartbeat:{} run at {},from lastReceive:{}", heartbeat,
-							System.currentTimeMillis(), (System.currentTimeMillis() - lastReceive));
-				}
-				if (System.currentTimeMillis() - lastReceive >= heartbeatIntervalMillis * 3) {
-					try {
+				try {
+					if (counter.incrementAndGet() % 100 == 0) {
 						if (log.isInfoEnabled()) {
-							log.info("IdleStateTimerTask of heartbeat:{} was timeout,close...", heartbeat);
+							log.info("total IdleState Tasks:{}", scheduledThreadPoolExecutor.getQueue().size());
 						}
-						heartbeat.close();
-					} catch (Throwable e) {
-						log.error("close that heartbeat:{} timeouted occur ex", heartbeat, e);
 					}
-					cancel();
+
+					long lastReceive = heartbeat.lastReceive();
+					if (log.isDebugEnabled()) {
+						log.debug("IdleStateTimerTask of heartbeat:{} run at {},from lastReceive:{}", heartbeat,
+								System.currentTimeMillis(), (System.currentTimeMillis() - lastReceive));
+					}
+					if (System.currentTimeMillis() - lastReceive >= heartbeatIntervalMillis * 3) {
+						try {
+							if (log.isInfoEnabled()) {
+								log.info("IdleStateTimerTask of heartbeat:{} was timeout,close...", heartbeat);
+							}
+							heartbeat.close();
+						} catch (Throwable e) {
+							log.error("close that heartbeat:{} timeouted occur ex", heartbeat, e);
+						}
+						cancel();
+					}
+				} catch (Throwable e) {
+					log.error("ex on run IdleStateTimerTask", e);
 				}
 			}
 		};

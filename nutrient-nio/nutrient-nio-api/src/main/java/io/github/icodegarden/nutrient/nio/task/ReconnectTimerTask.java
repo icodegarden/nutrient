@@ -3,11 +3,10 @@ package io.github.icodegarden.nutrient.nio.task;
 import java.io.IOException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.atomic.AtomicLong;
 
 import io.github.icodegarden.nutrient.nio.health.Heartbeat;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 客户端主动发起
@@ -15,8 +14,10 @@ import io.github.icodegarden.nutrient.nio.health.Heartbeat;
  * @author Fangfang.Xu
  *
  */
+@Slf4j
 public class ReconnectTimerTask {
-	private static Logger log = LoggerFactory.getLogger(ReconnectTimerTask.class);
+
+	private AtomicLong counter = new AtomicLong();
 
 	private long heartbeatIntervalMillis;
 	private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = TimerTaskThreadPools
@@ -41,23 +42,33 @@ public class ReconnectTimerTask {
 				"ReconnectTimerTask-" + heartbeat.toString(), scheduledThreadPoolExecutor) {
 			@Override
 			public void run() {
-				boolean shouldReconnect = heartbeat.shouldReconnect(heartbeatIntervalMillis);
-
-				if (shouldReconnect) {
-					try {
-						heartbeat.reconnect();
-					} catch (Throwable e) {
-						/**
-						 * 只尝试1次重连，失败则关闭client<br>
-						 * 这里只需要只需close不需要cancel任务，cancel任务会在close client时自动触发
-						 */
-						log.error("reconnect failed, will close client.", e);
-						try {
-							heartbeat.close();
-						} catch (IOException ignore) {
-							log.error("WARN ex on close client", ignore);
+				try {
+					if (counter.incrementAndGet() % 100 == 0) {
+						if (log.isInfoEnabled()) {
+							log.info("total Reconnect Tasks:{}", scheduledThreadPoolExecutor.getQueue().size());
 						}
 					}
+
+					boolean shouldReconnect = heartbeat.shouldReconnect(heartbeatIntervalMillis);
+
+					if (shouldReconnect) {
+						try {
+							heartbeat.reconnect();
+						} catch (Throwable e) {
+							/**
+							 * 只尝试1次重连，失败则关闭client<br>
+							 * 这里只需要只需close不需要cancel任务，cancel任务会在close client时自动触发
+							 */
+							log.error("reconnect failed, will close client.", e);
+							try {
+								heartbeat.close();
+							} catch (IOException ignore) {
+								log.error("WARN ex on close client", ignore);
+							}
+						}
+					}
+				} catch (Throwable e) {
+					log.error("ex on run ReconnectTimerTask", e);
 				}
 			}
 		};

@@ -2,11 +2,10 @@ package io.github.icodegarden.nutrient.nio.task;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.atomic.AtomicLong;
 
 import io.github.icodegarden.nutrient.nio.health.Heartbeat;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 客户端主动发起
@@ -14,8 +13,10 @@ import io.github.icodegarden.nutrient.nio.health.Heartbeat;
  * @author Fangfang.Xu
  *
  */
+@Slf4j
 public class HeartbeatTimerTask {
-	private static Logger log = LoggerFactory.getLogger(HeartbeatTimerTask.class);
+
+	private AtomicLong counter = new AtomicLong();
 
 	public static final long DEFAULT_INTERVAL_MILLIS = 60000;
 	private long heartbeatIntervalMillis;
@@ -34,6 +35,12 @@ public class HeartbeatTimerTask {
 			@Override
 			public void run() {
 				try {
+					if (counter.incrementAndGet() % 100 == 0) {
+						if (log.isInfoEnabled()) {
+							log.info("total Heartbeat Tasks:{}", scheduledThreadPoolExecutor.getQueue().size());
+						}
+					}
+
 					heartbeat.send();
 				} catch (Throwable e) {
 					log.error("WARN heartbeat:{} send beat occur ex", heartbeat, e);

@@ -56,8 +56,12 @@ public class NioClientPool implements Closeable {
 			throw new IllegalStateException("schedule was started");
 		}
 		future = scheduledThreadPool.scheduleWithFixedDelay(() -> {
-			for (Entry<String, NioClient> entry : nioClients.entrySet()) {
-				removePoolIfClosed(entry.getKey());
+			try {
+				for (Entry<String, NioClient> entry : nioClients.entrySet()) {
+					removePoolIfClosed(entry.getKey());
+				}
+			} catch (Exception e) {
+				log.error("ex on removePoolIfClosed", e);
 			}
 		}, scheduleMillis, scheduleMillis, TimeUnit.MILLISECONDS);
 	}
@@ -136,15 +140,15 @@ public class NioClientPool implements Closeable {
 	@Override
 	public void close() {
 		scheduledThreadPool.shutdown();
-		
-		nioClients.values().forEach(client->{
+
+		nioClients.values().forEach(client -> {
 			try {
 				client.close();
 			} catch (IOException e) {
-				log.warn("close NioClient failed on close pool. client:{}",client, e);
+				log.warn("close NioClient failed on close pool. client:{}", client, e);
 			}
 		});
-		
+
 		nioClients.clear();
 	}
 }

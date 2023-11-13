@@ -161,7 +161,7 @@ public class ZnodeDataZooKeeperInstanceMetrics implements ZooKeeperInstanceMetri
 		Metrics metrics;
 		try {
 			metrics = (Metrics) deserializer.deserialize(data);
-		} catch (SerializationException e) {
+		} catch (Exception e) {
 			/**
 			 * 序列化不兼容，虚构
 			 */

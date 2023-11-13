@@ -55,4 +55,8 @@ public class HeartbeatTimerTask {
 				TimeUnit.MILLISECONDS);
 		return scheduleCancelableRunnable;
 	}
+	
+	public long getHeartbeatIntervalMillis() {
+		return heartbeatIntervalMillis;
+	}
 }

@@ -22,6 +22,8 @@ import io.github.icodegarden.nutrient.lang.util.SystemUtils;
 public class ClientNioSelector implements Closeable {
 	private static final Logger log = LoggerFactory.getLogger(ClientNioSelector.class);
 
+	private final long selectTimeoutMillis;
+	
 	/**
 	 * 
 	 * @param name
@@ -44,6 +46,7 @@ public class ClientNioSelector implements Closeable {
 
 	private ClientNioSelector(String name) {
 		this.name = name;
+		this.selectTimeoutMillis = Long.parseLong( System.getProperty("nutrient.nio.java.selectTimeoutMillis", "100"));
 	}
 
 	public void registerRead(ClientNioEventListener nioEventListener) throws ClosedChannelException {
@@ -60,13 +63,13 @@ public class ClientNioSelector implements Closeable {
 					try {
 						int count;
 						if (SystemUtils.isWindowsPlatform()) {
-							count = selector.select(100);
+							count = selector.select(selectTimeoutMillis);
 							/**
 							 * 在windows下不加这个会有问题
 							 */
 							System.out.print("");// slow
 						} else {
-							count = selector.select(100);
+							count = selector.select(selectTimeoutMillis);
 						}
 
 						if (count > 0) {

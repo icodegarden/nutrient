@@ -13,6 +13,7 @@ import io.github.icodegarden.nutrient.lang.exception.remote.ClientClosedRemoteEx
 import io.github.icodegarden.nutrient.lang.exception.remote.ConnectFailedRemoteException;
 import io.github.icodegarden.nutrient.lang.exception.remote.ExceedExpectedRemoteException;
 import io.github.icodegarden.nutrient.lang.exception.remote.RemoteException;
+import io.github.icodegarden.nutrient.lang.util.SystemUtils;
 import io.github.icodegarden.nutrient.nio.AbstractNioClient;
 import io.github.icodegarden.nutrient.nio.Channel;
 import io.github.icodegarden.nutrient.nio.ExchangeMessage;
@@ -31,7 +32,9 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 	private static final Logger log = LoggerFactory.getLogger(JavaNioClient.class);
 
 	private static volatile ClientNioSelector commonClientNioSelector;
-	
+
+	private long lastErrorTime = 0;
+
 	private SocketChannelSpace socketChannelSpace;
 
 	private final ClientNioSelector clientNioSelector;
@@ -48,11 +51,11 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 
 	private ScheduleCancelableRunnable heartbeatTask;
 	private ScheduleCancelableRunnable reconnectTask;
-	
+
 	public JavaNioClient(InetSocketAddress address) {
 		this(address, getCommonClientNioSelector(), HeartbeatTimerTask.DEFAULT, ReconnectTimerTask.DEFAULT);
 	}
-	
+
 	public JavaNioClient(InetSocketAddress address, ClientNioSelector clientNioSelector) {
 		this(address, clientNioSelector, HeartbeatTimerTask.DEFAULT, ReconnectTimerTask.DEFAULT);
 	}
@@ -69,9 +72,9 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 		this.heartbeatTimerTask = heartbeatTimerTask;
 		this.reconnectTimerTask = reconnectTimerTask;
 	}
-	
+
 	private static synchronized ClientNioSelector getCommonClientNioSelector() {
-		if(commonClientNioSelector == null) {
+		if (commonClientNioSelector == null) {
 			commonClientNioSelector = ClientNioSelector.openNew("CommonClientNioSelector");
 		}
 		return commonClientNioSelector;
@@ -178,12 +181,19 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 				Future.received(message.getRequestId(), message.getBody());
 			}
 		} catch (ClosedChannelException e) {
-			// 通常是client自身网络断开，实测证明也可能是server下线等
-			if (log.isWarnEnabled()) {
-				log.warn("client channel was closed, may be client disconnect or server was Not Available");
+			/**
+			 * JDK NIO 空轮询?
+			 */
+			if (lastErrorTime + heartbeatTimerTask.getHeartbeatIntervalMillis() < SystemUtils.currentTimeMillis()) {
+				// 通常是client自身网络断开，实测证明也可能是server下线等
+				if (log.isWarnEnabled()) {
+					log.warn("client channel was closed, may be client disconnect or server was Not Available");
+				}
+				// reconnect();
+				heartbeat.markReconnect();// 重连时机交给ReconnectTimerTask
+
+				lastErrorTime = SystemUtils.currentTimeMillis();
 			}
-			//reconnect(); 
-			heartbeat.markReconnect();//重连时机交给ReconnectTimerTask
 		} catch (IOException e) {
 			/**
 			 * IMPT 通常由于server主动关闭，客户端要close自己，后续NioClientPool就能够在获取连接时识别已关闭并移除
@@ -253,7 +263,7 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 
 	@Override
 	public synchronized void close() throws IOException {
-		if(log.isInfoEnabled()) {
+		if (log.isInfoEnabled()) {
 			log.info("client do close...");
 		}
 		try {
@@ -270,7 +280,7 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 			closed = true;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return "[closed=" + closed + ", socketChannel=" + socketChannel + "]";

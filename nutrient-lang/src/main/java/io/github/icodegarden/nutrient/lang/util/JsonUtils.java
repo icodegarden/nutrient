@@ -3,6 +3,8 @@ package io.github.icodegarden.nutrient.lang.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -19,10 +21,12 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
@@ -166,6 +170,38 @@ public abstract class JsonUtils {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("deserialize json error", e);
 		}
+	}
+
+	public static ObjectNode put(ObjectNode node, String key, Object value) {
+		if (value == null) {
+			return node;
+		}
+
+		if (value instanceof String) {
+			return node.put(key, value.toString());
+		} else if (value instanceof Integer) {
+			return node.put(key, (Integer) value);
+		} else if (value instanceof Long) {
+			return node.put(key, (Long) value);
+		} else if (value instanceof Boolean) {
+			return node.put(key, (Boolean) value);
+		} else if (value instanceof Short) {
+			return node.put(key, (Short) value);
+		} else if (value instanceof Double) {
+			return node.put(key, (Double) value);
+		} else if (value instanceof Float) {
+			return node.put(key, (Float) value);
+		} else if (value instanceof BigDecimal) {
+			return node.put(key, (BigDecimal) value);
+		} else if (value instanceof BigInteger) {
+			return node.put(key, (BigInteger) value);
+		} else if (value instanceof byte[]) {
+			return node.put(key, (byte[]) value);
+		} else if (value instanceof JsonNode) {
+			return node.set(key, (JsonNode) value);
+		}
+
+		return node;
 	}
 
 	public static ObjectMapper getObjectMapper() {

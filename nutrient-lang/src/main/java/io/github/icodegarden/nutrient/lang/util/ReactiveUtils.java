@@ -13,11 +13,11 @@ import reactor.core.scheduler.Schedulers;
  */
 public abstract class ReactiveUtils {
 
-	public static <T> T block(Mono<T> mono) {
+	public static <T> T block(Mono<T> mono) throws Throwable {
 		return block(mono, null);
 	}
 
-	public static <T> T block(Mono<T> mono, Long blockTimeoutMs) {
+	public static <T> T block(Mono<T> mono, Long blockTimeoutMs) throws Throwable {
 		AtomicReference<Throwable> referenceE = new AtomicReference<>();
 		AtomicReference<T> reference = new AtomicReference<>();
 
@@ -44,7 +44,7 @@ public abstract class ReactiveUtils {
 		}
 
 		if (referenceE.get() != null) {
-			throw new RuntimeException(referenceE.get());
+			throw referenceE.get();
 		}
 		return reference.get();
 	}

@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 class ReactiveUtilsTests {
 
 	@Test
-	void block() throws Exception {
+	void block() throws Throwable {
 		Mono<String> mono = Mono.just("d1");
 		System.out.println(ReactiveUtils.block(mono));
 

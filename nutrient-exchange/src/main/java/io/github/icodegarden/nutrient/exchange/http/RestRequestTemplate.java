@@ -41,7 +41,7 @@ public class RestRequestTemplate {
 
 	private int connectTimeout = -1;
 	private int readTimeout = -1;
-	
+
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
 	}
@@ -85,7 +85,7 @@ public class RestRequestTemplate {
 			Class<T> responseType) throws RemoteException {
 		Object request = null;
 		HttpHeaders httpHeaders = null;
-		if(httpEntity != null) {
+		if (httpEntity != null) {
 			request = httpEntity.getBody();
 			httpHeaders = httpEntity.getHeaders();
 		}
@@ -111,7 +111,7 @@ public class RestRequestTemplate {
 			ParameterizedTypeReference<T> typeReference) throws RemoteException {
 		Object request = null;
 		HttpHeaders httpHeaders = null;
-		if(httpEntity != null) {
+		if (httpEntity != null) {
 			request = httpEntity.getBody();
 			httpHeaders = httpEntity.getHeaders();
 		}
@@ -127,6 +127,8 @@ public class RestRequestTemplate {
 
 	private URI buildURI(String url) {
 		try {
+			url = UriBuilder.fromUriString(url);
+
 			return new URI(url);
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
@@ -298,7 +300,7 @@ public class RestRequestTemplate {
 				byte[] bs = new byte[available];
 				response.getBody().read(bs);
 				return (T) new String(bs, "utf-8");
-			} else if(responseType == Void.class) {
+			} else if (responseType == Void.class) {
 				return null;
 			}
 
@@ -321,15 +323,16 @@ public class RestRequestTemplate {
 	}
 
 	public static class DefaultResponseErrorHandler implements ResponseErrorHandler {
-		
+
 		private final Collection<String> extractHeadersOn4xx;
 		private final Collection<String> extractHeadersOn5xx;
 
 		public DefaultResponseErrorHandler() {
 			this(null, null);
 		}
-		
-		public DefaultResponseErrorHandler(Collection<String> extractHeadersOn4xx,Collection<String> extractHeadersOn5xx) {
+
+		public DefaultResponseErrorHandler(Collection<String> extractHeadersOn4xx,
+				Collection<String> extractHeadersOn5xx) {
 			this.extractHeadersOn4xx = extractHeadersOn4xx;
 			this.extractHeadersOn5xx = extractHeadersOn5xx;
 		}
@@ -402,7 +405,7 @@ public class RestRequestTemplate {
 
 			switch (Integer.toString(statusCode).charAt(0)) {
 			case '4':
-				if(extractHeadersOn4xx != null) {
+				if (extractHeadersOn4xx != null) {
 					List<String> removeNames = httpHeaders.keySet().stream()
 							.filter(key -> !extractHeadersOn4xx.contains(key)).collect(Collectors.toList());
 					removeNames.forEach(removeName -> {
@@ -412,7 +415,7 @@ public class RestRequestTemplate {
 				throw new HttpClientRemoteException(message, statusCode, httpHeaders);
 //					throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
 			case '5':
-				if(extractHeadersOn5xx != null) {
+				if (extractHeadersOn5xx != null) {
 					List<String> removeNames = httpHeaders.keySet().stream()
 							.filter(key -> !extractHeadersOn5xx.contains(key)).collect(Collectors.toList());
 					removeNames.forEach(removeName -> {

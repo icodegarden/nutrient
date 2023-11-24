@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,8 +98,16 @@ abstract class UriBuilder {
 //			return builder;
 
 			MultiValueMap<String, String> queryParams = query(query);
-			StringBuilder sb = new StringBuilder(128).append(scheme).append("://").append(host).append(":").append(port)
-					.append(path);
+			StringBuilder sb = new StringBuilder(128);
+			if (StringUtils.hasLength(scheme)) {
+				sb.append(scheme).append("://");
+			}
+			sb.append(host);
+			if (StringUtils.hasLength(port)) {
+				sb.append(":").append(port);
+			}
+			sb.append(path);
+
 			int i = 0;
 			for (Entry<String, List<String>> entry : queryParams.entrySet()) {
 				String key = entry.getKey();
@@ -112,7 +119,7 @@ abstract class UriBuilder {
 						sb.append(",");
 					}
 				}
-				
+
 				i++;
 			}
 			return sb.toString();

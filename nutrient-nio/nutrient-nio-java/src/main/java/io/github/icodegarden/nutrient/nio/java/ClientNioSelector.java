@@ -23,7 +23,7 @@ public class ClientNioSelector implements Closeable {
 	private static final Logger log = LoggerFactory.getLogger(ClientNioSelector.class);
 
 	private final long selectTimeoutMillis;
-	
+
 	/**
 	 * 
 	 * @param name
@@ -46,7 +46,7 @@ public class ClientNioSelector implements Closeable {
 
 	private ClientNioSelector(String name) {
 		this.name = name;
-		this.selectTimeoutMillis = Long.parseLong( System.getProperty("nutrient.nio.java.selectTimeoutMillis", "100"));
+		this.selectTimeoutMillis = Long.parseLong(System.getProperty("nutrient.nio.java.selectTimeoutMillis", "100"));
 	}
 
 	public void registerRead(ClientNioEventListener nioEventListener) throws ClosedChannelException {
@@ -95,6 +95,12 @@ public class ClientNioSelector implements Closeable {
 					} catch (Throwable e) {
 						log.error("ex on Client Nio Select loop handle", e);
 					}
+				}
+
+				try {
+					selector.close();
+				} catch (IOException e) {
+					throw new RuntimeException("ex on close Selector", e);
 				}
 			};
 		}.start();

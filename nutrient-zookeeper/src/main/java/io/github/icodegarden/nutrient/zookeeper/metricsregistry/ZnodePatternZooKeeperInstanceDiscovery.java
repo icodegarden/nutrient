@@ -50,7 +50,7 @@ public class ZnodePatternZooKeeperInstanceDiscovery implements ZooKeeperInstance
 		if (serviceName == null || serviceName.isEmpty() || serviceName.startsWith("/")) {
 			throw new IllegalArgumentException("param serviceName must not empty and not start with /");
 		}
-		String path = RegistryServiceNamePath.ensureServiceNamePath(zooKeeperHolder, root, serviceName);
+		String path = RegistryServiceNamePath.buildServiceNamePath(root, serviceName);
 		try {
 			List<String> children = zooKeeperHolder.getConnectedZK().getChildren(path, false);
 			List<ZooKeeperRegisteredInstance> instances = children.stream().map(child -> {

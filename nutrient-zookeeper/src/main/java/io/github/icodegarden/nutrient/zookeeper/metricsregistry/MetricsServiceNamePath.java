@@ -12,19 +12,20 @@ import io.github.icodegarden.nutrient.zookeeper.ZooKeeperHolder;
  */
 class MetricsServiceNamePath {
 
-	private static Map<String, String> map = new ConcurrentHashMap<String, String>();
+	private static final Map<String, String> NAME_PATH_MAP = new ConcurrentHashMap<String, String>();
 
 	static String ensureServiceNamePath(ZooKeeperHolder zooKeeperHolder, String root, String serviceName) {
-		String path = map.get(serviceName);
-		if (path == null) {
-			path = buildServiceNamePath(root, serviceName);
-			zooKeeperHolder.ensureRootNode(path);
-			map.put(serviceName, path);
-		}
+		String path = buildServiceNamePath(root, serviceName);
+		zooKeeperHolder.ensureRootNode(path);
 		return path;
 	}
 
 	static String buildServiceNamePath(String root, String serviceName) {
-		return root + "/" + serviceName + "/metrics";
+		String path = NAME_PATH_MAP.get(serviceName);
+		if (path == null) {
+			path = root + "/" + serviceName + "/metrics";
+			NAME_PATH_MAP.put(serviceName, path);
+		}
+		return path;
 	}
 }

@@ -73,7 +73,7 @@ public class ZnodeDataZooKeeperInstanceMetrics implements ZooKeeperInstanceMetri
 			return;
 		}
 
-		String path = MetricsServiceNamePath.ensureServiceNamePath(zooKeeperHolder, root, instance.getServiceName());
+		String path = MetricsServiceNamePath.buildServiceNamePath(root, instance.getServiceName());
 
 		String nodeName = path + "/" + instance.getInstanceName();
 
@@ -85,10 +85,13 @@ public class ZnodeDataZooKeeperInstanceMetrics implements ZooKeeperInstanceMetri
 		if (data.length >= InvalidDataSizeZooKeeperException.MAX_DATA_SIZE) {
 			throw new InvalidDataSizeZooKeeperException(data.length);
 		}
+
 		try {
 			zooKeeperHolder.getConnectedZK().setData(nodeName, data, -1);
 		} catch (KeeperException.NoNodeException ignore) {
 			try {
+				MetricsServiceNamePath.ensureServiceNamePath(zooKeeperHolder, root, instance.getServiceName());
+
 				zooKeeperHolder.getConnectedZK().create(nodeName, data, ACLs.AUTH_ALL_ACL, CreateMode.EPHEMERAL);
 			} catch (KeeperException | InterruptedException e) {
 				throw new ExceedExpectedZooKeeperException(
@@ -106,7 +109,7 @@ public class ZnodeDataZooKeeperInstanceMetrics implements ZooKeeperInstanceMetri
 		if (instance == null) {
 			return null;
 		}
-		String path = MetricsServiceNamePath.ensureServiceNamePath(zooKeeperHolder, root, instance.getServiceName());
+		String path = MetricsServiceNamePath.buildServiceNamePath(root, instance.getServiceName());
 
 		String nodeName = path + "/" + instance.getInstanceName();
 		try {
@@ -125,7 +128,7 @@ public class ZnodeDataZooKeeperInstanceMetrics implements ZooKeeperInstanceMetri
 		if (serviceName == null || serviceName.isEmpty() || serviceName.startsWith("/")) {
 			throw new IllegalArgumentException("param name must not empty and not start with /");
 		}
-		String path = MetricsServiceNamePath.ensureServiceNamePath(zooKeeperHolder, root, serviceName);
+		String path = MetricsServiceNamePath.buildServiceNamePath(root, serviceName);
 
 		List<String> children;
 		try {

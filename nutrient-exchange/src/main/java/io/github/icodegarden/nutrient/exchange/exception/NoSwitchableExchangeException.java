@@ -15,9 +15,9 @@ public class NoSwitchableExchangeException extends ExchangeException {
 
 	public static final String MESSAGE = "No Switchable";
 
-	public NoSwitchableExchangeException(Collection<MetricsInstance> candidates,
+	public NoSwitchableExchangeException(String statusCode, Collection<MetricsInstance> candidates,
 			Collection<ExchangeFailedInstance> exchangedInstances) {
-		super(MESSAGE, candidates, exchangedInstances);
+		super(statusCode, MESSAGE, candidates, exchangedInstances);
 	}
 
 }

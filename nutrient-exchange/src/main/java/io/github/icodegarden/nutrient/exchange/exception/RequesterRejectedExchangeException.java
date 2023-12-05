@@ -17,7 +17,7 @@ public class RequesterRejectedExchangeException extends ExchangeException {
 	public static final String MESSAGE = "Requester Rejected";
 
 	public RequesterRejectedExchangeException(String reason, Collection<MetricsInstance> candidates) {
-		super(MESSAGE + "-" + reason, candidates, Collections.emptyList());
+		super("403", MESSAGE + "-" + reason, candidates, Collections.emptyList());
 	}
 
 }

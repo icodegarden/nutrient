@@ -16,7 +16,7 @@ public class NoQualifiedInstanceExchangeException extends ExchangeException {
 	public static final String MESSAGE = "No Qualified Instance";
 
 	public NoQualifiedInstanceExchangeException(Collection<MetricsInstance> candidates) {
-		super(MESSAGE, candidates, null);
+		super("417", MESSAGE, candidates, null);
 	}
 
 }

@@ -92,7 +92,8 @@ public class CandidatesSwitchableExchanger implements Exchanger<ShardExchangeRes
 			if (ExchangeFailedReason.KEYWORD_REQUEST_TIMEOUT.equals(result.failedReason().getKeyword())
 					|| ExchangeFailedReason.KEYWORD_CLIENT_INVALID.equals(result.failedReason().getKeyword())
 					|| ExchangeFailedReason.KEYWORD_SERVER_EXCEPTION.equals(result.failedReason().getKeyword())) {
-				throw new NoSwitchableExchangeException(candidates, exchangedInstances);
+				throw new NoSwitchableExchangeException(result.failedReason().getStatusCode(), candidates,
+						exchangedInstances);
 			}
 		}
 
@@ -135,7 +136,7 @@ public class CandidatesSwitchableExchanger implements Exchanger<ShardExchangeRes
 		} catch (TimeoutRemoteException e) {
 			exchangeFailedReason = ExchangeFailedReason.requestTimeout(e.getMessage() + ", timeout:" + timeout, e);
 		} catch (ClientInvalidRemoteException e) {
-			exchangeFailedReason = ExchangeFailedReason.clientInvalid(e.getMessage(), e);
+			exchangeFailedReason = ExchangeFailedReason.clientInvalid(e.getMessage(), e.getStatusCode(), e);
 		} catch (ServerErrorRemoteException e) {
 			exchangeFailedReason = ExchangeFailedReason.serverException(e.getMessage(), e);
 		} catch (Exception e) {

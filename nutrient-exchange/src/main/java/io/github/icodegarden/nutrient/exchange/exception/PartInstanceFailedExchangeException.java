@@ -19,7 +19,7 @@ public class PartInstanceFailedExchangeException extends ExchangeException {
 
 	public PartInstanceFailedExchangeException(Collection<MetricsInstance> candidates,
 			Collection<ExchangeFailedInstance> exchangeFailedInstances, Collection<MetricsInstance> successInstances) {
-		super(MESSAGE, candidates, exchangeFailedInstances);
+		super("500", MESSAGE, candidates, exchangeFailedInstances);
 		this.successInstances = successInstances;
 	}
 

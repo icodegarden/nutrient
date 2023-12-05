@@ -156,7 +156,7 @@ public class ParallelExchanger implements Exchanger<ParallelExchangeResult> {
 					} catch (Exception e) {// 不会出，担保
 						log.error("ex on parallel exchangeInstances", e);
 						exchangeExceptions
-								.add(new NoSwitchableExchangeException(candidatesOfShard, Collections.emptyList()));
+								.add(new NoSwitchableExchangeException("500", candidatesOfShard, Collections.emptyList()));
 					} finally {
 						countDownLatch.countDown();
 					}

@@ -16,7 +16,7 @@ public class AllInstanceFailedExchangeException extends ExchangeException {
 
 	public AllInstanceFailedExchangeException(Collection<MetricsInstance> candidates,
 			Collection<ExchangeFailedInstance> exchangedInstances) {
-		super(MESSAGE, candidates, exchangedInstances);
+		super("500", MESSAGE, candidates, exchangedInstances);
 	}
 
 }

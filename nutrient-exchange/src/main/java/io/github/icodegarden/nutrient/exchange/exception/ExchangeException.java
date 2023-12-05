@@ -13,18 +13,24 @@ import io.github.icodegarden.nutrient.lang.util.JsonUtils;
  */
 public abstract class ExchangeException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
-	
+
 	public static final int DEFAULT_MAX_MESSAGE_LENGTH = 65535;
-	
+
+	private String statusCode;
 	private Collection<MetricsInstance> candidates;
 	private Collection<ExchangeFailedInstance> exchangedInstances;
 	private int maxMessageLength = DEFAULT_MAX_MESSAGE_LENGTH;
 
-	protected ExchangeException(String message, Collection<MetricsInstance> candidates,
+	protected ExchangeException(String statusCode, String message, Collection<MetricsInstance> candidates,
 			Collection<ExchangeFailedInstance> exchangedInstances) {
 		super(message);
+		this.statusCode = statusCode;
 		this.candidates = candidates;
 		this.exchangedInstances = exchangedInstances;
+	}
+
+	public String getStatusCode() {
+		return statusCode;
 	}
 
 	public Collection<MetricsInstance> getCandidates() {
@@ -38,31 +44,38 @@ public abstract class ExchangeException extends RuntimeException {
 	public void setMaxMessageLength(int maxMessageLength) {
 		this.maxMessageLength = maxMessageLength;
 	}
-	
+
 	@Override
 	public String getMessage() {
-		String json = new Json(super.getMessage(), candidates, exchangedInstances).toJson();
+		String json = new Json(statusCode, super.getMessage(), candidates, exchangedInstances).toJson();
 		/**
 		 * 预估长度是不会超出的，保险起见
 		 */
 		if (json.length() >= maxMessageLength) {
-			json = new Json(super.getMessage(), Collections.emptyList(), exchangedInstances).toJson();
+			json = new Json(statusCode, super.getMessage(), Collections.emptyList(), exchangedInstances).toJson();
 		}
 		return json;
 	}
-	
+
 	@SuppressWarnings("all")
 	private class Json {
+		private String statusCode;
 		private String message;
 		private Collection<MetricsInstance> candidates;
 		private Collection<ExchangeFailedInstance> exchangedInstances;
-		public Json(String message, Collection<MetricsInstance> candidates,
+
+		public Json(String statusCode, String message, Collection<MetricsInstance> candidates,
 				Collection<ExchangeFailedInstance> exchangedInstances) {
+			this.statusCode = statusCode;
 			this.message = message;
 			this.candidates = candidates;
 			this.exchangedInstances = exchangedInstances;
-		} 
-		
+		}
+
+		public String getStatusCode() {
+			return statusCode;
+		}
+
 		public String getMessage() {
 			return message;
 		}

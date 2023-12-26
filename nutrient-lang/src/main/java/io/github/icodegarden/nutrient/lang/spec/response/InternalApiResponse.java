@@ -2,6 +2,8 @@ package io.github.icodegarden.nutrient.lang.spec.response;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * 
  * @author Fangfang.Xu
@@ -30,6 +32,17 @@ public class InternalApiResponse<R> extends ApiResponse {
 
 	public R getBiz_content() {
 		return biz_content;
+	}
+
+	/**
+	 * 若结果是失败则throw
+	 */
+	@JsonIgnore
+	public R getBiz_contentElseThrow() throws ErrorCodeException {
+		if (isSuccess()) {
+			return biz_content;
+		}
+		throw toErrorCodeException();
 	}
 
 	public void setBiz_content(R biz_content) {

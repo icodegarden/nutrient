@@ -29,6 +29,8 @@ import io.github.icodegarden.nutrient.redis.args.GeoArgs;
 import io.github.icodegarden.nutrient.redis.args.GeoCoordinate;
 import io.github.icodegarden.nutrient.redis.args.GeoRadiusStoreArgs;
 import io.github.icodegarden.nutrient.redis.args.GeoSearch;
+import io.github.icodegarden.nutrient.redis.args.GeoSearch.GeoPredicate;
+import io.github.icodegarden.nutrient.redis.args.GeoSearch.GeoRef;
 import io.github.icodegarden.nutrient.redis.args.GeoUnit;
 import io.github.icodegarden.nutrient.redis.args.GeoValue;
 import io.github.icodegarden.nutrient.redis.args.GeoWithin;
@@ -60,12 +62,10 @@ import io.github.icodegarden.nutrient.redis.args.XClaimArgs;
 import io.github.icodegarden.nutrient.redis.args.XGroupCreateArgs;
 import io.github.icodegarden.nutrient.redis.args.XPendingArgs;
 import io.github.icodegarden.nutrient.redis.args.XReadArgs;
+import io.github.icodegarden.nutrient.redis.args.XReadArgs.StreamOffset;
 import io.github.icodegarden.nutrient.redis.args.XTrimArgs;
 import io.github.icodegarden.nutrient.redis.args.ZAddArgs;
 import io.github.icodegarden.nutrient.redis.args.ZAggregateArgs;
-import io.github.icodegarden.nutrient.redis.args.GeoSearch.GeoPredicate;
-import io.github.icodegarden.nutrient.redis.args.GeoSearch.GeoRef;
-import io.github.icodegarden.nutrient.redis.args.XReadArgs.StreamOffset;
 import io.github.icodegarden.nutrient.redis.lettuce.util.LettuceUtils;
 import io.github.icodegarden.nutrient.redis.util.EvalUtils;
 import io.lettuce.core.CopyArgs;
@@ -409,7 +409,7 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 	@Override
 	public List<byte[]> hmget(byte[] key, byte[]... fields) {
 		List<io.lettuce.core.KeyValue<byte[], byte[]>> list = syncRedisCommands.hmget(key, fields);
-		return list.stream().map(io.lettuce.core.KeyValue::getValue).collect(Collectors.toList());
+		return list.stream().map(kv -> kv.hasValue() ? kv.getValue() : null).collect(Collectors.toList());
 	}
 
 	@Override
@@ -430,12 +430,13 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 	@Override
 	public Map<byte[], byte[]> hrandfieldWithValues(byte[] key, long count) {
 		List<io.lettuce.core.KeyValue<byte[], byte[]>> list = syncRedisCommands.hrandfieldWithvalues(key, count);
-		return list.stream().collect(
-				Collectors.toMap(io.lettuce.core.KeyValue::getKey, io.lettuce.core.KeyValue::getValue, (a, b) -> a));
+		return list.stream().collect(Collectors.toMap(io.lettuce.core.KeyValue::getKey,
+				kv -> kv.hasValue() ? kv.getValue() : null, (a, b) -> a));
 	}
 
 	@Override
-	public MapScanCursor<byte[], byte[]> hscan(byte[] key, io.github.icodegarden.nutrient.redis.args.ScanCursor cursor) {
+	public MapScanCursor<byte[], byte[]> hscan(byte[] key,
+			io.github.icodegarden.nutrient.redis.args.ScanCursor cursor) {
 		ScanCursor scanCursor = LettuceUtils.convertScanCursor(cursor);
 
 		io.lettuce.core.MapScanCursor<byte[], byte[]> scanResult = syncRedisCommands.hscan(key, scanCursor);
@@ -624,7 +625,7 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 	@Override
 	public List<byte[]> mget(byte[]... keys) {
 		List<io.lettuce.core.KeyValue<byte[], byte[]>> list = syncRedisCommands.mget(keys);
-		return list.stream().map(io.lettuce.core.KeyValue::getValue).collect(Collectors.toList());
+		return list.stream().map(kv -> kv.hasValue() ? kv.getValue() : null).collect(Collectors.toList());
 	}
 
 	@Override
@@ -704,14 +705,14 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 	public KeyValue<byte[], List<byte[]>> blmpop(long timeout, ListDirection direction, byte[]... keys) {
 		LMPopArgs lmPopArgs = convertLMPopArgs(direction, null);
 		io.lettuce.core.KeyValue<byte[], List<byte[]>> kv = syncRedisCommands.blmpop(timeout, lmPopArgs, keys);
-		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	@Override
 	public KeyValue<byte[], List<byte[]>> blmpop(long timeout, ListDirection direction, long count, byte[]... keys) {
 		LMPopArgs lmPopArgs = convertLMPopArgs(direction, count);
 		io.lettuce.core.KeyValue<byte[], List<byte[]>> kv = syncRedisCommands.blmpop(timeout, lmPopArgs, keys);
-		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	private LMPopArgs convertLMPopArgs(ListDirection direction, Long count) {
@@ -730,25 +731,25 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 	@Override
 	public KeyValue<byte[], byte[]> blpop(long timeout, byte[]... keys) {
 		io.lettuce.core.KeyValue<byte[], byte[]> kv = syncRedisCommands.blpop(timeout, keys);
-		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	@Override
 	public KeyValue<byte[], byte[]> blpop(double timeout, byte[]... keys) {
 		io.lettuce.core.KeyValue<byte[], byte[]> kv = syncRedisCommands.blpop(timeout, keys);
-		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	@Override
 	public KeyValue<byte[], byte[]> brpop(long timeout, byte[]... keys) {
 		io.lettuce.core.KeyValue<byte[], byte[]> kv = syncRedisCommands.brpop(timeout, keys);
-		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	@Override
 	public KeyValue<byte[], byte[]> brpop(double timeout, byte[]... keys) {
 		io.lettuce.core.KeyValue<byte[], byte[]> kv = syncRedisCommands.brpop(timeout, keys);
-		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], byte[]>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	@Override
@@ -781,14 +782,14 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 	public KeyValue<byte[], List<byte[]>> lmpop(ListDirection direction, byte[]... keys) {
 		LMPopArgs lmPopArgs = convertLMPopArgs(direction, null);
 		io.lettuce.core.KeyValue<byte[], List<byte[]>> kv = syncRedisCommands.lmpop(lmPopArgs, keys);
-		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	@Override
 	public KeyValue<byte[], List<byte[]>> lmpop(ListDirection direction, long count, byte[]... keys) {
 		LMPopArgs lmPopArgs = convertLMPopArgs(direction, count);
 		io.lettuce.core.KeyValue<byte[], List<byte[]>> kv = syncRedisCommands.lmpop(lmPopArgs, keys);
-		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.getValue());
+		return new KeyValue<byte[], List<byte[]>>(kv.getKey(), kv.hasValue() ? kv.getValue() : null);
 	}
 
 	@Override
@@ -1027,8 +1028,8 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 			return null;
 		}
 
-		io.lettuce.core.ScoredValue<byte[]> v = kv.getValue();
-		ScoredValue<byte[]> scoredValue = new ScoredValue<byte[]>(v.getScore(), v.getValue());
+		io.lettuce.core.ScoredValue<byte[]> v = kv.hasValue() ? kv.getValue() : null;
+		ScoredValue<byte[]> scoredValue = new ScoredValue<byte[]>(v.getScore(), v.hasValue() ? v.getValue() : null);
 		return new KeyValue<byte[], ScoredValue<byte[]>>(kv.getKey(), scoredValue);
 	}
 
@@ -1040,8 +1041,8 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 			return null;
 		}
 
-		io.lettuce.core.ScoredValue<byte[]> v = kv.getValue();
-		ScoredValue<byte[]> scoredValue = new ScoredValue<byte[]>(v.getScore(), v.getValue());
+		io.lettuce.core.ScoredValue<byte[]> v = kv.hasValue() ? kv.getValue() : null;
+		ScoredValue<byte[]> scoredValue = new ScoredValue<byte[]>(v.getScore(), v.hasValue() ? v.getValue() : null);
 		return new KeyValue<byte[], ScoredValue<byte[]>>(kv.getKey(), scoredValue);
 	}
 
@@ -1417,7 +1418,8 @@ public abstract class AbstractLettuceRedisExecutor implements RedisExecutor {
 	}
 
 	@Override
-	public ScoredValueScanCursor<byte[]> zscan(byte[] key, io.github.icodegarden.nutrient.redis.args.ScanCursor cursor) {
+	public ScoredValueScanCursor<byte[]> zscan(byte[] key,
+			io.github.icodegarden.nutrient.redis.args.ScanCursor cursor) {
 		ScanCursor scanCursor = LettuceUtils.convertScanCursor(cursor);
 
 		io.lettuce.core.ScoredValueScanCursor<byte[]> scanResult = syncRedisCommands.zscan(key, scanCursor);

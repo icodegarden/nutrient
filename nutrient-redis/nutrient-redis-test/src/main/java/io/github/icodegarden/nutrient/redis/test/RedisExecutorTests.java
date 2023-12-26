@@ -71,7 +71,7 @@ public abstract class RedisExecutorTests {
 	static byte[] k2 = "test{tag}key2".getBytes();
 	static byte[] k3 = "test{tag}key3".getBytes();
 
-	RedisExecutor redisExecutor;
+	public RedisExecutor redisExecutor;
 
 	@BeforeEach
 	void init() {
@@ -261,16 +261,15 @@ public abstract class RedisExecutorTests {
 
 	@Test
 	public void mget() throws Exception {
-		byte[] k2 = "test{tag}key2".getBytes();
-
 		redisExecutor.set(key, "abc".getBytes());
 		redisExecutor.set(k2, "abcd".getBytes());
 
-		List<byte[]> mget = redisExecutor.mget(key, "test{tag}key2".getBytes());
+		List<byte[]> mget = redisExecutor.mget(key, k2, k3);
 
-		Assertions.assertThat(mget).hasSize(2);
+		Assertions.assertThat(mget).hasSize(3);
 		Assertions.assertThat(new String(mget.get(0))).isEqualTo("abc");
 		Assertions.assertThat(new String(mget.get(1))).isEqualTo("abcd");
+		Assertions.assertThat(mget.get(2)).isNull();
 	}
 
 	@Test

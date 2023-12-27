@@ -107,10 +107,18 @@ public class NettyNioClient extends AbstractNioClient implements io.github.icode
 	@Override
 	public synchronized void connect() throws ConnectFailedRemoteException {
 		try {
+			if (log.isInfoEnabled()) {
+				log.info("client connecting {}", address);
+			}
+			
 			ChannelFuture future = bootstrap.connect(address);
 			boolean ret = future.awaitUninterruptibly(3000, MILLISECONDS);
 
 			if (ret && future.isSuccess()) {
+				if (log.isInfoEnabled()) {
+					log.info("client connected {}", address);
+				}
+				
 				Channel newChannel = future.channel();
 				this.channel = newChannel;
 
@@ -134,7 +142,7 @@ public class NettyNioClient extends AbstractNioClient implements io.github.icode
 	@Override
 	public synchronized void reconnect() throws ConnectFailedRemoteException {
 		if (log.isInfoEnabled()) {
-			log.info("client do reconnect...");
+			log.info("client do reconnect {}", address);
 		}
 		// 由于reconnectTask 不能关闭，不能调用close
 		try {

@@ -95,7 +95,7 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 			socketChannel.configureBlocking(false);
 
 			if (log.isInfoEnabled()) {
-				log.info("client connecting...");
+				log.info("client connecting {}", address);
 			}
 
 			socketChannel.connect(address);// non blocking模式结果一定是false
@@ -117,7 +117,7 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 			}
 
 			if (log.isInfoEnabled()) {
-				log.info("client connected");
+				log.info("client connected {}", address);
 			}
 
 			socketChannelSpace = new SocketChannelSpace("client");
@@ -153,7 +153,7 @@ public class JavaNioClient extends AbstractNioClient implements ClientNioEventLi
 				reconnectTask = reconnectTimerTask.register(heartbeat);
 			}
 			if (log.isInfoEnabled()) {
-				log.info("client finishConnect");
+				log.info("client finishConnect {}", address);
 			}
 		}
 		return connected;

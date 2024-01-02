@@ -17,7 +17,7 @@ import io.github.icodegarden.nutrient.lang.query.Page;
  */
 public abstract class PageUtils {
 
-	private static final ThreadLocal<Page> LOCAL_PAGE = new ThreadLocal<Page>();
+	private static final ThreadLocal<Page<?>> LOCAL_PAGE = new ThreadLocal<>();
 
 	public static <E> Page<E> startPage(int pageNum, int pageSize, boolean count) {
 		return startPage(pageNum, pageSize, count, null);
@@ -43,7 +43,7 @@ public abstract class PageUtils {
 	 * @return
 	 */
 	public static boolean isPage() {
-		Page<Object> page = LOCAL_PAGE.get();
+		Page<?> page = LOCAL_PAGE.get();
 		return page != null;
 	}
 
@@ -54,7 +54,7 @@ public abstract class PageUtils {
 	 * @return
 	 */
 	public static boolean isCount() {
-		Page<Object> page = LOCAL_PAGE.get();
+		Page<?> page = LOCAL_PAGE.get();
 		return page != null ? page.isCount() : false;
 	}
 
@@ -131,7 +131,7 @@ public abstract class PageUtils {
 			targetPage.setTotalPages(page.getTotalPages());
 		} else {
 			if (page.getResult().size() < page.getPageSize()) {
-				targetPage.setTotalCount((page.getTotalPages() - 1) * page.getPageSize() + page.getResult().size());
+				targetPage.setTotalCount((page.getPageNum() - 1) * page.getPageSize() + page.getResult().size());
 				targetPage.setTotalPages(page.getPageNum());
 			} else {
 				targetPage.setTotalCount(maxTotal);

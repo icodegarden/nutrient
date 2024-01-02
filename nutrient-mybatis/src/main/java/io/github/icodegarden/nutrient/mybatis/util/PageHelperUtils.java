@@ -97,7 +97,7 @@ public abstract class PageHelperUtils {
 			targetPage.setPages(page.getPages());
 		} else {
 			if (page.getResult().size() < page.getPageSize()) {
-				targetPage.setTotal((page.getPages() - 1) * page.getPageSize() + page.getResult().size());
+				targetPage.setTotal((page.getPageNum() - 1) * page.getPageSize() + page.getResult().size());
 				targetPage.setPages(page.getPageNum());
 			} else {
 				targetPage.setTotal(maxTotal);

@@ -29,7 +29,7 @@ public abstract class DataSourceUtils {
 		for (DataSourceConfig datasource : datasources) {
 			HikariDataSource ds = new HikariDataSource();
 			ds.setPoolName(datasource.getName());
-			ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+			ds.setDriverClassName(datasource.getDriverClassName());
 			ds.setJdbcUrl(datasource.getJdbcUrl());
 			ds.setUsername(datasource.getUsername());
 			ds.setPassword(datasource.getPassword());

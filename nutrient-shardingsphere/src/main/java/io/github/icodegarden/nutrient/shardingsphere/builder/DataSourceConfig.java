@@ -18,6 +18,7 @@ public class DataSourceConfig {
 	 * datasource name 如ds0
 	 */
 	private String name;
+	private String driverClassName = "com.mysql.cj.jdbc.Driver"; //默认mysql
 	private String jdbcUrl;
 	private String username;
 	private String password;

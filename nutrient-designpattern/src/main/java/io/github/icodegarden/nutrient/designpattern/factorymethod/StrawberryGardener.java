@@ -4,6 +4,6 @@ public class StrawberryGardener implements FruitGardener
 {
     public Fruit factory()
     {
-        return new Apple();
+        return new Strawberry();
     }
 }

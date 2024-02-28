@@ -91,7 +91,7 @@ public class InputStreamClassLoaderTests {
 
 	@Test
 	void hotDeployment() throws Exception {
-		Tester tester = new Tester();
+		ITester tester = new Tester();
 		tester.m();
 
 		for (int i = 0; i < 20; i++) {
@@ -99,13 +99,13 @@ public class InputStreamClassLoaderTests {
 					Tester.class.getName(),
 					new FileInputStream("target/classes/io/github/icodegarden/nutrient/lang/classloader/Tester.class"));
 			
-			ITester obj = classLoader.newInstance(ITester.class, i * 10);
+			tester = classLoader.newInstance(ITester.class, i * 10);
 
 //			或
 //			Class<?> cc = classLoader.loadClass();
-//			ITester obj = (ITester) cc.newInstance();
+//			tester = (ITester) cc.newInstance();
 			
-			obj.m();
+			tester.m();
 
 			Thread.sleep(100);
 		}

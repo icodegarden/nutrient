@@ -27,7 +27,7 @@ public abstract class PageHelperUtils {
 	public static <E> Page<E> startPage(int pageNum, int pageSize, boolean count, String orderBy) {
 		return PageHelper.startPage(pageNum, pageSize, count).setOrderBy(orderBy);
 	}
-	
+
 	/**
 	 * 只转换类型
 	 */
@@ -119,4 +119,18 @@ public abstract class PageHelperUtils {
 		}
 	}
 
+	public static <E> io.github.icodegarden.nutrient.lang.query.Page<E> convertPage(Page<E> page) {
+		io.github.icodegarden.nutrient.lang.query.Page<E> newPage = new io.github.icodegarden.nutrient.lang.query.Page<E>(
+				page.getPageNum(), page.getPageSize());
+		newPage.setTotalCount(page.getTotal());
+		newPage.setTotalPages(page.getPages());
+		newPage.setCount(page.isCount());
+		newPage.setOrderBy(page.getOrderBy());
+
+		if (page.getResult() != null) {
+			newPage.addAll(page.getResult());
+		}
+
+		return newPage;
+	}
 }

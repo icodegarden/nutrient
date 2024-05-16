@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.github.icodegarden</groupId>
 		<artifactId>nutrient-nio</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>nutrient-nio-test</artifactId>
@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>io.github.icodegarden</groupId>
 			<artifactId>nutrient-nio-api</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.1</version>
 		</dependency>
 		
 		<dependency>

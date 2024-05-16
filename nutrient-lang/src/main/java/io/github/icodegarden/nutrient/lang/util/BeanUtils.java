@@ -1,64 +1,71 @@
 package io.github.icodegarden.nutrient.lang.util;
-//package io.github.icodegarden.nutrient.lang.util;
-//
-//import java.lang.reflect.Field;
-//import java.util.Arrays;
-//import java.util.Map;
-//import java.util.stream.Collectors;
-//
-///**
-// * 
-// * @author Fangfang.Xu
-// *
-// */
-//public class BeanUtils {
-//
-//	/**
-//	 * copy本类和父类递归的字段 FIXME 有final字段赋值问题
-//	 * @param source
-//	 * @param target
-//	 */
-//	public static void copyProperties(Object source, Object target) {
-//		copyProperties(source, source.getClass(), target, target.getClass());
-//	}
-//
-//	private static void copyProperties(Object source, Class<?> sourceClass, Object target, Class<?> targetClass) {
-//		if (sourceClass == Object.class || targetClass == Object.class) {
-//			return;
-//		}
-//
-//		Field[] sourceFields = sourceClass.getDeclaredFields();
-//		Field[] targetFields = targetClass.getDeclaredFields();
-//
-//		Map<String, Field> targetFieldsMap = Arrays.asList(targetFields).stream()
-//				.collect(Collectors.toMap(Field::getName, f -> f));
-//
-//		for (Field sourceField : sourceFields) {
-//			Field targetField = targetFieldsMap.get(sourceField.getName());
-//			if (targetField != null) {
-//				boolean sourceFieldAccessible = sourceField.isAccessible();
-//				boolean targetFieldAccessible = targetField.isAccessible();
-//				if (!sourceFieldAccessible) {
-//					sourceField.setAccessible(true);
-//				}
-//				if (!targetFieldAccessible) {
-//					targetField.setAccessible(true);
-//				}
-//				try {
-//					targetField.set(target, sourceField.get(source));
-//				} catch (IllegalAccessException e) {
-//					throw new IllegalStateException(e);
-//				}
-//
-//				if (!sourceFieldAccessible) {
-//					sourceField.setAccessible(sourceFieldAccessible);
-//				}
-//				if (!targetFieldAccessible) {
-//					targetField.setAccessible(targetFieldAccessible);
-//				}
-//			}
-//		}
-//
-//		copyProperties(source, sourceClass.getSuperclass(), target, targetClass.getSuperclass());
-//	}
-//}
+
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
+
+import io.github.icodegarden.nutrient.lang.annotation.Nullable;
+
+/**
+ * 
+ * @author Fangfang.Xu
+ *
+ */
+public class BeanUtils {
+
+	/**
+	 * 任意字段是否有值
+	 * 
+	 * @param obj
+	 * @param ignoreFieldNames 忽略的字段
+	 * @return
+	 */
+	public static boolean anyFieldHasValue(Object obj, @Nullable Collection<String> ignoreFieldNames) {
+		Class<?> cla = obj.getClass();
+		List<Field> allDeclaredFields = ClassUtils.getAllDeclaredFields(cla);
+
+		return allDeclaredFields.stream().anyMatch(field -> {
+			if (!org.springframework.util.CollectionUtils.isEmpty(ignoreFieldNames)
+					&& ignoreFieldNames.contains(field.getName())) {
+				return false;
+			}
+			boolean accessible = field.isAccessible();
+			field.setAccessible(true);
+			try {
+				return field.get(obj) != null;
+			} catch (IllegalAccessException e) {
+				throw new IllegalStateException("Can Not Access", e);
+			} finally {
+				field.setAccessible(accessible);
+			}
+		});
+	}
+
+	/**
+	 * 所有字段是否有值
+	 * 
+	 * @param obj
+	 * @param ignoreFieldNames 忽略的字段
+	 * @return
+	 */
+	public static boolean allFieldHasValue(Object obj, @Nullable Collection<String> ignoreFieldNames) {
+		Class<?> cla = obj.getClass();
+		List<Field> allDeclaredFields = ClassUtils.getAllDeclaredFields(cla);
+
+		return allDeclaredFields.stream().allMatch(field -> {
+			if (!org.springframework.util.CollectionUtils.isEmpty(ignoreFieldNames)
+					&& ignoreFieldNames.contains(field.getName())) {
+				return true;
+			}
+			boolean accessible = field.isAccessible();
+			field.setAccessible(true);
+			try {
+				return field.get(obj) != null;
+			} catch (IllegalAccessException e) {
+				throw new IllegalStateException("Can Not Access", e);
+			} finally {
+				field.setAccessible(accessible);
+			}
+		});
+	}
+}

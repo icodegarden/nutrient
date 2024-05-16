@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.github.icodegarden</groupId>
 		<artifactId>nutrient-elasticsearch</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>nutrient-elasticsearch-api</artifactId>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>io.github.icodegarden</groupId>
 			<artifactId>nutrient-lang</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.1</version>
 		</dependency>
 
 	</dependencies>

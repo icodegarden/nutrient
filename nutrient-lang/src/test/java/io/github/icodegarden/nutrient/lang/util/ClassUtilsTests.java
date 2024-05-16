@@ -1,5 +1,6 @@
 package io.github.icodegarden.nutrient.lang.util;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -45,16 +46,24 @@ class ClassUtilsTests {
 		Assertions.assertThat(types.get(0)).isEqualTo(String.class);
 		Assertions.assertThat(types.get(1)).isEqualTo(Long.class);
 	}
+	
+	@Test
+	void getAllDeclaredFields() throws Exception {
+		List<Field> fields = ClassUtils.getAllDeclaredFields(User2.class);
+		
+		Assertions.assertThat(fields.stream().anyMatch(field->field.getName().equals("name1"))).isTrue();
+		Assertions.assertThat(fields.stream().anyMatch(field->field.getName().equals("name2"))).isTrue();
+	}
 
 	private interface User<T, R> {
 	}
 
 	private class User1 implements User<String, Long> {
-
+		private String name1;
 	}
 
 	private class User2 extends User1 {
-
+		private String name2;
 	}
 	
 	private interface Group {

@@ -61,3 +61,4 @@
 
 # 3.0.1
 * 修复lettuce redis 多key查询结果空指针问题
+* 增加BeanUtils

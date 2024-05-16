@@ -33,7 +33,7 @@ public class ServerErrorCodeException extends ErrorCodeException {
 		super(CODE, MSG, String.format("server.%s.%s-error", getApplicationName(), error_point), sub_msg, cause);
 	}
 
-	ServerErrorCodeException(String sub_code, String sub_msg) {
+	public ServerErrorCodeException(String sub_code, String sub_msg) {
 		super(CODE, MSG, sub_code, sub_msg);
 	}
 

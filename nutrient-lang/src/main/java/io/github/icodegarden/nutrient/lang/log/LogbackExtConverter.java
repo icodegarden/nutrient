@@ -1,6 +1,7 @@
 package io.github.icodegarden.nutrient.lang.log;
 
 import java.lang.reflect.Method;
+import java.util.ServiceLoader;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,8 @@ import io.github.icodegarden.nutrient.lang.util.SystemUtils;
  */
 public class LogbackExtConverter extends MessageConverter {
 
+	private static ServiceLoader<LogExtSpi> logExtSpis = ServiceLoader.load(LogExtSpi.class);
+	
 	private static Method getUserIdM;
 	private static Method getUsernameM;
 	private static Method getRequestIdM;
@@ -84,6 +87,13 @@ public class LogbackExtConverter extends MessageConverter {
 					}
 				}
 			}
+
+			if (logExtSpis != null) {
+				logExtSpis.forEach(ext -> {
+					sb.append(",").append(ext.key()).append(":").append(ext.value());
+				});
+			}
+
 			return sb.toString();
 		} catch (Exception e) {
 			return "convert:error cause " + e.toString();

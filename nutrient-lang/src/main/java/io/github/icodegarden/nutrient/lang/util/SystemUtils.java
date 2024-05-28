@@ -728,8 +728,8 @@ public abstract class SystemUtils {
 		private static String ip;
 
 		static {
-			if (ClassUtils.isPresent("io.github.icodegarden.nutrient.springboot.SpringContext",
-					ClassUtils.getDefaultClassLoader())) {
+			String springContextClassName = "io.github.icodegarden.nursery.springboot.SpringContext";
+			if (ClassUtils.isPresent(springContextClassName, ClassUtils.getDefaultClassLoader())) {
 				new Thread() {
 					public void run() {
 						ThreadUtils.sleep(10000);
@@ -738,8 +738,7 @@ public abstract class SystemUtils {
 						while (DEFAULT_SERVER_NAME.equals(Server.serverName)
 								&& (System.currentTimeMillis() - start < 1800 * 1000)) {
 							try {
-								Class<?> springContextClass = ClassUtils.forName(
-										"io.github.icodegarden.nutrient.springboot.SpringContext",
+								Class<?> springContextClass = ClassUtils.forName(springContextClassName,
 										ClassUtils.getDefaultClassLoader());
 								Method getApplicationContextMethod = springContextClass
 										.getDeclaredMethod("getApplicationContext");

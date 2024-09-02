@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -536,6 +538,24 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 		try {
 			BulkByScrollResponse response = client.deleteByQuery(request, RequestOptions.DEFAULT);
 			return (int) response.getDeleted();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	@Override
+	public void increment(String id, String fieldName, long value) {
+		UpdateRequest updateRequest = new UpdateRequest(getIndex(), id);
+
+		HashMap<String, Object> params = new HashMap<String, Object>(1);
+		params.put("value", value);
+		Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, Script.DEFAULT_SCRIPT_LANG, //
+				new StringBuilder(64).append("ctx._source.").append(fieldName).append(" += params.value;").toString()//
+				, Collections.emptyMap(), params);
+		updateRequest.script(script);
+
+		try {
+			client.update(updateRequest, RequestOptions.DEFAULT);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}

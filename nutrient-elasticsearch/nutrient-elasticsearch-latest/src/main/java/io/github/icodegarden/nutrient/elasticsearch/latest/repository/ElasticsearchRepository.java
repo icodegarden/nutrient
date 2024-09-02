@@ -3,6 +3,7 @@ package io.github.icodegarden.nutrient.elasticsearch.latest.repository;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,10 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.ErrorCause;
 import co.elastic.clients.elasticsearch._types.ErrorResponse;
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.InlineScript;
+import co.elastic.clients.elasticsearch._types.Script;
+import co.elastic.clients.elasticsearch._types.ScriptBuilders;
+import co.elastic.clients.elasticsearch._types.ScriptLanguage;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
@@ -543,6 +548,29 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		try {
 			DeleteByQueryResponse response = client.deleteByQuery(builder.build());
 			return response.deleted().intValue();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	@Override
+	public void increment(String id, String fieldName, long value) {
+		HashMap<String, JsonData> params = new HashMap<String, JsonData>(1);
+		params.put("value", JsonData.of(value));
+		InlineScript inlineScript = ScriptBuilders
+				.inline().lang(ScriptLanguage.Painless).source(new StringBuilder(64).append("ctx._source.")
+						.append(fieldName).append(" += params.value;").toString())
+				.options(Collections.emptyMap()).params(params).build();
+
+		Script script = new Script.Builder().inline(inlineScript).build();
+		UpdateRequest.Builder<U, U> builder = new UpdateRequest.Builder<U, U>().index(getIndex()).id(id);
+		builder.script(script);
+		try {
+			UpdateResponse<U> updateResponse = client.update(builder.build(), getClassU());
+			if (updateResponse.shards().failed().intValue() > 0) {
+				throw new IllegalStateException(
+						"update failed, failed shards:" + updateResponse.shards().failed().intValue());
+			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}

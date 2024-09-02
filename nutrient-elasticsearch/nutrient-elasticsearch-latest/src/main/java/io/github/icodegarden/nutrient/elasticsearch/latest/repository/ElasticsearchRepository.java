@@ -322,7 +322,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		if (query.getTerms() != null) {
 			for (Entry<String, Object> entry : query.getTerms().entrySet()) {
 				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.term(b2 -> b2.field(entry.getKey()).value(entry.getValue().toString())));
+					boolBuilder.filter(b -> b.term(b2 -> b2.field(entry.getKey()).value(entry.getValue().toString())));
 				}
 			}
 		}
@@ -347,7 +347,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		if (query.getRangeFroms() != null) {
 			for (Entry<String, Object> entry : query.getRangeFroms().entrySet()) {
 				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.range(b2 -> b2.field(entry.getKey()).gte(JsonData.of(entry.getValue()))));
+					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).gte(JsonData.of(entry.getValue()))));
 				}
 			}
 		}
@@ -355,7 +355,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		if (query.getRangeTos() != null) {
 			for (Entry<String, Object> entry : query.getRangeTos().entrySet()) {
 				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.range(b2 -> b2.field(entry.getKey()).lte(JsonData.of(entry.getValue()))));
+					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).lte(JsonData.of(entry.getValue()))));
 				}
 			}
 		}
@@ -363,8 +363,10 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		if (query.getWildcards() != null) {
 			for (Entry<String, Object> entry : query.getWildcards().entrySet()) {
 				if (entry.getValue() != null) {
+//					boolBuilder.must(b -> b
+//							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("*%s*", entry.getValue()))));
 					boolBuilder.must(b -> b
-							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("*%s*", entry.getValue()))));
+							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("%s*", entry.getValue()))));// 最左匹配提升性能
 				}
 			}
 		}

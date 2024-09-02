@@ -310,7 +310,7 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 		if (query.getTerms() != null) {
 			for (Entry<String, Object> entry : query.getTerms().entrySet()) {
 				if (entry.getValue() != null) {
-					boolQueryBuilder.must(QueryBuilders.termQuery(entry.getKey(), entry.getValue()));
+					boolQueryBuilder.filter(QueryBuilders.termQuery(entry.getKey(), entry.getValue()));
 				}
 			}
 		}
@@ -335,7 +335,7 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 		if (query.getRangeFroms() != null) {
 			for (Entry<String, Object> entry : query.getRangeFroms().entrySet()) {
 				if (entry.getValue() != null) {
-					boolQueryBuilder.must(QueryBuilders.rangeQuery(entry.getKey()).from(entry.getValue(), true));
+					boolQueryBuilder.filter(QueryBuilders.rangeQuery(entry.getKey()).from(entry.getValue(), true));
 				}
 			}
 		}
@@ -343,7 +343,7 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 		if (query.getRangeTos() != null) {
 			for (Entry<String, Object> entry : query.getRangeTos().entrySet()) {
 				if (entry.getValue() != null) {
-					boolQueryBuilder.must(QueryBuilders.rangeQuery(entry.getKey()).to(entry.getValue(), true));
+					boolQueryBuilder.filter(QueryBuilders.rangeQuery(entry.getKey()).to(entry.getValue(), true));
 				}
 			}
 		}
@@ -351,8 +351,10 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 		if (query.getWildcards() != null) {
 			for (Entry<String, Object> entry : query.getWildcards().entrySet()) {
 				if (entry.getValue() != null) {
+//					boolQueryBuilder
+//							.must(QueryBuilders.wildcardQuery(entry.getKey(), String.format("*%s*", entry.getValue())));
 					boolQueryBuilder
-							.must(QueryBuilders.wildcardQuery(entry.getKey(), String.format("*%s*", entry.getValue())));
+							.must(QueryBuilders.wildcardQuery(entry.getKey(), String.format("%s*", entry.getValue())));// 最左匹配提升性能
 				}
 			}
 		}

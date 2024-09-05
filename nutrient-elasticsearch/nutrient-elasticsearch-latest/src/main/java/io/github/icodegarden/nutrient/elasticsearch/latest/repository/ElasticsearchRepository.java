@@ -185,27 +185,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	private void doUpdate(String index, U update) throws ElasticsearchException {
-		UpdateRequest.Builder<U, U> builder = buildUpdateRequestBuilderOnUpdate(update);
-		builder.index(index);
-		try {
-			UpdateResponse<U> updateResponse = client.update(builder.build(), (Class) update.getClass());
-			if (updateResponse.shards().failed().intValue() > 0) {
-				throw new IllegalStateException(
-						"update failed, failed shards:" + updateResponse.shards().failed().intValue());
-			}
-		} catch (ElasticsearchException e) {
-			if (e.status() == 409) {// CONFLICT
-				/**
-				 * 通过id的更新，几乎不应该存在并发更新
-				 */
-				throw new IllegalStateException("conflict on update", e);
-			}
-			throw e;
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+	
 
 	@Override
 	public NextQuerySupportPage<DO> findAll(Q query) {
@@ -309,71 +289,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	/**
-	 * 不满足时自行覆盖
-	 * 
-	 * @param query
-	 * @return
-	 */
-	protected co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder buildQueryBuilder(Q query) {
-		co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = new co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder();
-		BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
-
-		if (query.getTerms() != null) {
-			for (Entry<String, Object> entry : query.getTerms().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.filter(b -> b.term(b2 -> b2.field(entry.getKey()).value(entry.getValue().toString())));
-				}
-			}
-		}
-
-		if (query.getMatches() != null) {
-			for (Entry<String, Object> entry : query.getMatches().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.match(b2 -> b2.field(entry.getKey()).query(entry.getValue().toString())));
-				}
-			}
-		}
-
-		if (query.getMultiMatches() != null) {
-			for (Entry<Object, List<String>> entry : query.getMultiMatches().entrySet()) {
-				if (entry.getValue() != null) {
-					String value = entry.getValue().stream().collect(Collectors.joining(" "));
-					boolBuilder.must(b -> b.multiMatch(b2 -> b2.fields(entry.getKey().toString()).query(value)));
-				}
-			}
-		}
-
-		if (query.getRangeFroms() != null) {
-			for (Entry<String, Object> entry : query.getRangeFroms().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).gte(JsonData.of(entry.getValue()))));
-				}
-			}
-		}
-
-		if (query.getRangeTos() != null) {
-			for (Entry<String, Object> entry : query.getRangeTos().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).lte(JsonData.of(entry.getValue()))));
-				}
-			}
-		}
-
-		if (query.getWildcards() != null) {
-			for (Entry<String, Object> entry : query.getWildcards().entrySet()) {
-				if (entry.getValue() != null) {
-//					boolBuilder.must(b -> b
-//							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("*%s*", entry.getValue()))));
-					boolBuilder.must(b -> b
-							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("%s*", entry.getValue()))));// 最左匹配提升性能
-				}
-			}
-		}
-
-		queryBuilder.bool(boolBuilder.build());
-		return queryBuilder;
-	}
+	
 
 	/**
 	 * 先根据id查index<br>
@@ -463,33 +379,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	/**
-	 * 文档可能存在于非最新索引，可以使用term查询还处于可读的索引（hot、warm、cold）
-	 * 
-	 * @param id
-	 * @return
-	 */
-	private Hit<DO> findOneIfAliasOfMultiIndex(String id) {
-		if (isAliasOfMultiIndex()) {
-			LogUtils.infoIfEnabled(log, () -> log.info("findOneIfAliasOfMultiIndex index:{}, id:{}", getIndex(), id));
-
-			co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = new co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder();
-			BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
-			boolBuilder.must(b -> b.term(b2 -> b2.field(getIdFieldName()).value(id)));
-			SearchRequest searchRequest = new SearchRequest.Builder().index(getIndex()).query(queryBuilder.build())
-					.size(1).timeout(getReadTimeoutMillis() + "ms").build();
-			try {
-				SearchResponse<DO> searchResponse = client.search(searchRequest, getClassDO());
-
-				HitsMetadata<DO> hits = searchResponse.hits();
-				long total = hits.total().value();
-				return total == 0 ? null : hits.hits().get(0);
-			} catch (IOException e2) {
-				throw new IllegalStateException(e2);
-			}
-		}
-		return null;
-	}
+	
 
 	@Override
 	public int delete(String id) {
@@ -504,26 +394,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		return 1;
 	}
 
-	private void doDelete(String index, String id) throws ElasticsearchException {
-		DeleteRequest.Builder builder = buildDeleteRequestBuilderOnDelete(id);
-		builder.index(index);
-		try {
-			DeleteResponse deleteResponse = client.delete(builder.build());
-			/**
-			 * 删除时如果数据不存在，以前的版本不会报ElasticsearchStatusException 404，即使报了这里做冗余也不会错的
-			 */
-			if (deleteResponse.result().equals(co.elastic.clients.elasticsearch._types.Result.NotFound)) {
-				throw new ElasticsearchException("result not found", new ErrorResponse.Builder().status(404)
-						.error(new ErrorCause.Builder().reason("not found").build()).build());
-			}
-			if (deleteResponse.shards().successful().intValue() < 1) {
-				throw new IllegalStateException(
-						"delete failed, successful shards:" + deleteResponse.shards().successful().intValue());
-			}
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+	
 
 	@Override
 	public int deleteBatch(Collection<String> ids) {
@@ -578,6 +449,179 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
+	
+
+	protected abstract IndexRequest.Builder<PO> buildIndexRequestBuilderOnAdd(PO po);
+
+	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnAddBatch(Collection<PO> pos);
+
+	protected abstract UpdateRequest.Builder<U, U> buildUpdateRequestBuilderOnUpdate(U update);
+
+	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnUpdateBatch(Collection<U> updates);
+
+	protected abstract SearchRequest.Builder buildSearchRequestBuilderOnFindAll(Q query);
+
+	protected abstract CountRequest.Builder buildCountRequestBuilderOnCount(Q query);
+
+	protected abstract GetRequest.Builder buildGetRequestBuilderOnFindOne(String id, W with);
+
+	protected abstract MgetRequest.Builder buildMgetRequestBuilderOnFindByIds(List<String> ids, W with);
+
+	protected abstract DeleteRequest.Builder buildDeleteRequestBuilderOnDelete(String id);
+
+	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnDeleteBatch(Collection<String> ids);
+
+	protected abstract DeleteByQueryRequest.Builder buildDeleteByQueryRequestBuilderOnDeleteByQuery(Q query);
+	
+	private void doUpdate(String index, U update) throws ElasticsearchException {
+		UpdateRequest.Builder<U, U> builder = buildUpdateRequestBuilderOnUpdate(update);
+		builder.index(index);
+		try {
+			UpdateResponse<U> updateResponse = client.update(builder.build(), (Class) update.getClass());
+			if (updateResponse.shards().failed().intValue() > 0) {
+				throw new IllegalStateException(
+						"update failed, failed shards:" + updateResponse.shards().failed().intValue());
+			}
+		} catch (ElasticsearchException e) {
+			if (e.status() == 409) {// CONFLICT
+				/**
+				 * 通过id的更新，几乎不应该存在并发更新
+				 */
+				throw new IllegalStateException("conflict on update", e);
+			}
+			throw e;
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	/**
+	 * 不满足时自行覆盖
+	 * 
+	 * @param query
+	 * @return
+	 */
+	protected co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder buildQueryBuilder(Q query) {
+		co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = new co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder();
+		BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
+
+		if (query.getTerms() != null) {
+			for (Entry<String, Object> entry : query.getTerms().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.filter(b -> b.term(b2 -> b2.field(entry.getKey()).value(entry.getValue().toString())));
+				}
+			}
+		}
+
+		if (query.getMatches() != null) {
+			for (Entry<String, Object> entry : query.getMatches().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.must(b -> b.match(b2 -> b2.field(entry.getKey()).query(entry.getValue().toString())));
+				}
+			}
+		}
+
+		if (query.getMultiMatches() != null) {
+			for (Entry<Object, List<String>> entry : query.getMultiMatches().entrySet()) {
+				if (entry.getValue() != null) {
+					String value = entry.getValue().stream().collect(Collectors.joining(" "));
+					boolBuilder.must(b -> b.multiMatch(b2 -> b2.fields(entry.getKey().toString()).query(value)));
+				}
+			}
+		}
+
+		if (query.getRangeFroms() != null) {
+			for (Entry<String, Object> entry : query.getRangeFroms().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).gte(JsonData.of(entry.getValue()))));
+				}
+			}
+		}
+
+		if (query.getRangeTos() != null) {
+			for (Entry<String, Object> entry : query.getRangeTos().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).lte(JsonData.of(entry.getValue()))));
+				}
+			}
+		}
+
+		if (query.getWildcards() != null) {
+			for (Entry<String, Object> entry : query.getWildcards().entrySet()) {
+				if (entry.getValue() != null) {
+//					boolBuilder.must(b -> b
+//							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("*%s*", entry.getValue()))));
+					boolBuilder.must(b -> b
+							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("%s*", entry.getValue()))));// 最左匹配提升性能
+				}
+			}
+		}
+
+		if (query.getExists() != null) {
+			for (String fname : query.getExists()) {
+				boolBuilder.filter(b -> b.exists(b2 -> b2.field(fname)));
+			}
+		}
+
+		if (query.getNotExists() != null) {
+			for (String fname : query.getNotExists()) {
+				boolBuilder.mustNot(b -> b.exists(b2 -> b2.field(fname)));
+			}
+		}
+
+		queryBuilder.bool(boolBuilder.build());
+		return queryBuilder;
+	}
+	
+	/**
+	 * 文档可能存在于非最新索引，可以使用term查询还处于可读的索引（hot、warm、cold）
+	 * 
+	 * @param id
+	 * @return
+	 */
+	private Hit<DO> findOneIfAliasOfMultiIndex(String id) {
+		if (isAliasOfMultiIndex()) {
+			LogUtils.infoIfEnabled(log, () -> log.info("findOneIfAliasOfMultiIndex index:{}, id:{}", getIndex(), id));
+
+			co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = new co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder();
+			BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
+			boolBuilder.must(b -> b.term(b2 -> b2.field(getIdFieldName()).value(id)));
+			SearchRequest searchRequest = new SearchRequest.Builder().index(getIndex()).query(queryBuilder.build())
+					.size(1).timeout(getReadTimeoutMillis() + "ms").build();
+			try {
+				SearchResponse<DO> searchResponse = client.search(searchRequest, getClassDO());
+
+				HitsMetadata<DO> hits = searchResponse.hits();
+				long total = hits.total().value();
+				return total == 0 ? null : hits.hits().get(0);
+			} catch (IOException e2) {
+				throw new IllegalStateException(e2);
+			}
+		}
+		return null;
+	}
+	
+	private void doDelete(String index, String id) throws ElasticsearchException {
+		DeleteRequest.Builder builder = buildDeleteRequestBuilderOnDelete(id);
+		builder.index(index);
+		try {
+			DeleteResponse deleteResponse = client.delete(builder.build());
+			/**
+			 * 删除时如果数据不存在，以前的版本不会报ElasticsearchStatusException 404，即使报了这里做冗余也不会错的
+			 */
+			if (deleteResponse.result().equals(co.elastic.clients.elasticsearch._types.Result.NotFound)) {
+				throw new ElasticsearchException("result not found", new ErrorResponse.Builder().status(404)
+						.error(new ErrorCause.Builder().reason("not found").build()).build());
+			}
+			if (deleteResponse.shards().successful().intValue() < 1) {
+				throw new IllegalStateException(
+						"delete failed, successful shards:" + deleteResponse.shards().successful().intValue());
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
 	/**
 	 * @param consumer<T> T 真实索引
 	 */
@@ -613,26 +657,4 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		 */
 		throw e;
 	}
-
-	protected abstract IndexRequest.Builder<PO> buildIndexRequestBuilderOnAdd(PO po);
-
-	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnAddBatch(Collection<PO> pos);
-
-	protected abstract UpdateRequest.Builder<U, U> buildUpdateRequestBuilderOnUpdate(U update);
-
-	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnUpdateBatch(Collection<U> updates);
-
-	protected abstract SearchRequest.Builder buildSearchRequestBuilderOnFindAll(Q query);
-
-	protected abstract CountRequest.Builder buildCountRequestBuilderOnCount(Q query);
-
-	protected abstract GetRequest.Builder buildGetRequestBuilderOnFindOne(String id, W with);
-
-	protected abstract MgetRequest.Builder buildMgetRequestBuilderOnFindByIds(List<String> ids, W with);
-
-	protected abstract DeleteRequest.Builder buildDeleteRequestBuilderOnDelete(String id);
-
-	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnDeleteBatch(Collection<String> ids);
-
-	protected abstract DeleteByQueryRequest.Builder buildDeleteByQueryRequestBuilderOnDeleteByQuery(Q query);
 }

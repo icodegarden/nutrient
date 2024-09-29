@@ -71,7 +71,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuery<W>, W, DO>
 		extends ElasticsearchRepositorySupport<PO, U, Q, W, DO> {
 
-	private final ElasticsearchClient client;
+	protected final ElasticsearchClient client;
 //	private final ElasticsearchAsyncClient asyncClient;
 
 	public ElasticsearchRepository(ElasticsearchClient client, String index) {

@@ -72,7 +72,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQuery<W>, W, DO>
 		extends ElasticsearchRepositorySupport<PO, U, Q, W, DO> {
 
-	private final RestHighLevelClient client;
+	protected final RestHighLevelClient client;
 
 	public ElasticsearchV7Repository(RestHighLevelClient client, String index) {
 		this(client, index, null);

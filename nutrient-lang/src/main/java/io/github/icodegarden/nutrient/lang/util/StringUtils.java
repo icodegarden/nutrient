@@ -35,4 +35,28 @@ public class StringUtils {
 		matcher.appendTail(sb);
 		return sb.toString();
 	}
+	
+	public static String snakeToCamel(String snakeCase) {  
+        if (snakeCase == null || snakeCase.isEmpty()) {  
+            return snakeCase;  
+        }  
+  
+        StringBuilder camelCase = new StringBuilder();  
+        boolean shouldCapitalize = false;  
+  
+        for (char c : snakeCase.toCharArray()) {  
+            if (c == '_') {  
+                shouldCapitalize = true;  
+            } else {  
+                if (shouldCapitalize) {  
+                    camelCase.append(Character.toUpperCase(c));  
+                    shouldCapitalize = false;  
+                } else {  
+                    camelCase.append(Character.toLowerCase(c));  
+                }  
+            }  
+        }  
+  
+        return camelCase.toString();  
+    }  
 }

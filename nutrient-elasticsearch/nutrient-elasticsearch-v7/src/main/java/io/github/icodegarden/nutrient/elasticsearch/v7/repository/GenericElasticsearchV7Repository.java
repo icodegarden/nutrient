@@ -15,10 +15,12 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RequestOptions.Builder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
+import org.springframework.util.CollectionUtils;
 
 import io.github.icodegarden.nutrient.elasticsearch.query.ElasticsearchQuery;
 import io.github.icodegarden.nutrient.lang.IdObject;
@@ -97,13 +99,35 @@ public abstract class GenericElasticsearchV7Repository<PO extends IdObject<Strin
 	@Override
 	protected Tuple2<SearchRequest, RequestOptions> buildSearchRequestOnFindAll(Q query) {
 		SearchRequest searchRequest = new SearchRequest().indices(getIndex());
-		return Tuples.of(searchRequest, RequestOptions.DEFAULT);
+		
+		RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+		if (!CollectionUtils.isEmpty(query.getSourceExcludes())) {
+			String param = query.getSourceExcludes().stream().collect(Collectors.joining(","));
+			builder.addParameter("_source_excludes", param);
+		}
+		
+		if (!CollectionUtils.isEmpty(query.getSourceIncludes())) {
+			String param = query.getSourceIncludes().stream().collect(Collectors.joining(","));
+			builder.addParameter("_source_includes", param);
+		}
+		return Tuples.of(searchRequest, builder.build());
 	}
 
 	@Override
 	protected Tuple2<CountRequest, RequestOptions> buildCountRequestOnCount(Q query) {
 		CountRequest countRequest = new CountRequest().indices(getIndex());
-		return Tuples.of(countRequest, RequestOptions.DEFAULT);
+
+		RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+		if (!CollectionUtils.isEmpty(query.getSourceExcludes())) {
+			String param = query.getSourceExcludes().stream().collect(Collectors.joining(","));
+			builder.addParameter("_source_excludes", param);
+		}
+		
+		if (!CollectionUtils.isEmpty(query.getSourceIncludes())) {
+			String param = query.getSourceIncludes().stream().collect(Collectors.joining(","));
+			builder.addParameter("_source_includes", param);
+		}
+		return Tuples.of(countRequest, builder.build());
 	}
 
 	@Override

@@ -17,14 +17,14 @@ public class StringUtils {
 	}
 
 	/**
-	 * 驼峰转xxx
+	 * 驼峰转小写,userFullName -> userfullname
 	 */
 	public static String camelToLower(String str) {
 		return camelToLower(str, "");
 	}
 
 	/**
-	 * 驼峰转xxx
+	 * 驼峰转小写,允许指定连接符
 	 */
 	public static String camelToLower(String str, String connectStr) {
 		Matcher matcher = TPATTERN.matcher(str);
@@ -36,6 +36,9 @@ public class StringUtils {
 		return sb.toString();
 	}
 	
+	/**
+	 * 下划线连接串转驼峰,user_full_name -> userFullName 
+	 */
 	public static String snakeToCamel(String snakeCase) {  
         if (snakeCase == null || snakeCase.isEmpty()) {  
             return snakeCase;  

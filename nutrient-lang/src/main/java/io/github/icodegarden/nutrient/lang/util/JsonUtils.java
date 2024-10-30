@@ -67,6 +67,20 @@ public abstract class JsonUtils {
 		om.registerModule(timeModule);
 	}
 
+	public static boolean isJsonObjectWeakly(String str) {
+		if (str != null) {
+			return str.startsWith("{") && str.endsWith("}");
+		}
+		return false;
+	}
+
+	public static boolean isJsonArrayWeakly(String str) {
+		if (str != null) {
+			return str.startsWith("[") && str.endsWith("]");
+		}
+		return false;
+	}
+
 	public static String serialize(Object obj) throws IllegalArgumentException {
 		try {
 			return om.writeValueAsString(obj);

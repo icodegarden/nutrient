@@ -1,6 +1,7 @@
 package io.github.icodegarden.nutrient.elasticsearch.v7.repository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,10 +16,12 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RequestOptions.Builder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
 import org.springframework.util.CollectionUtils;
 
@@ -97,15 +100,36 @@ public abstract class GenericElasticsearchV7Repository<PO extends IdObject<Strin
 	}
 
 	@Override
+	protected Tuple2<UpdateByQueryRequest, RequestOptions> buildUpdateByQueryRequest(U update, Q query) {
+		String json = JsonUtils.serialize(update);
+		Map<String, Object> params = JsonUtils.deserialize(json, Map.class);
+
+		String source = params.entrySet().stream().map(entry -> {
+			return new StringBuilder(64).append("ctx._source.").append(entry.getKey()).append(" = params.")
+					.append(entry.getValue()).toString();
+		}).collect(Collectors.joining(";"));
+
+		Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, Script.DEFAULT_SCRIPT_LANG, //
+				source, Collections.emptyMap(), params);
+
+		UpdateByQueryRequest updateByQueryRequest = new UpdateByQueryRequest(getIndex());
+		BoolQueryBuilder queryBuilder = buildQueryBuilder(query);
+		updateByQueryRequest.setQuery(queryBuilder);
+		updateByQueryRequest.setScript(script);
+
+		return Tuples.of(updateByQueryRequest, RequestOptions.DEFAULT);
+	}
+
+	@Override
 	protected Tuple2<SearchRequest, RequestOptions> buildSearchRequestOnFindAll(Q query) {
 		SearchRequest searchRequest = new SearchRequest().indices(getIndex());
-		
+
 		RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
 		if (!CollectionUtils.isEmpty(query.getSourceExcludes())) {
 			String param = query.getSourceExcludes().stream().collect(Collectors.joining(","));
 			builder.addParameter("_source_excludes", param);
 		}
-		
+
 		if (!CollectionUtils.isEmpty(query.getSourceIncludes())) {
 			String param = query.getSourceIncludes().stream().collect(Collectors.joining(","));
 			builder.addParameter("_source_includes", param);
@@ -122,7 +146,7 @@ public abstract class GenericElasticsearchV7Repository<PO extends IdObject<Strin
 			String param = query.getSourceExcludes().stream().collect(Collectors.joining(","));
 			builder.addParameter("_source_excludes", param);
 		}
-		
+
 		if (!CollectionUtils.isEmpty(query.getSourceIncludes())) {
 			String param = query.getSourceIncludes().stream().collect(Collectors.joining(","));
 			builder.addParameter("_source_includes", param);
@@ -167,7 +191,10 @@ public abstract class GenericElasticsearchV7Repository<PO extends IdObject<Strin
 
 	@Override
 	protected Tuple2<DeleteByQueryRequest, RequestOptions> buildDeleteByQueryRequest(Q query) {
-		throw new UnsupportedOperationException("Please Impl buildDeleteByQueryRequest.");
+		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(getIndex());
+		BoolQueryBuilder queryBuilder = buildQueryBuilder(query);
+		deleteByQueryRequest.setQuery(queryBuilder);
+		return Tuples.of(deleteByQueryRequest, RequestOptions.DEFAULT);
 	}
 
 	protected Map<String, Object> toSource(Object obj) {

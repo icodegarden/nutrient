@@ -1,10 +1,16 @@
 package io.github.icodegarden.nutrient.elasticsearch.latest.repository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.InlineScript;
+import co.elastic.clients.elasticsearch._types.Script;
+import co.elastic.clients.elasticsearch._types.ScriptBuilders;
+import co.elastic.clients.elasticsearch._types.ScriptLanguage;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.CountRequest;
 import co.elastic.clients.elasticsearch.core.DeleteByQueryRequest;
@@ -13,10 +19,14 @@ import co.elastic.clients.elasticsearch.core.GetRequest;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.MgetRequest;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryRequest;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryRequest.Builder;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
+import co.elastic.clients.json.JsonData;
 import io.github.icodegarden.nutrient.elasticsearch.query.ElasticsearchQuery;
 import io.github.icodegarden.nutrient.lang.IdObject;
+import io.github.icodegarden.nutrient.lang.util.JsonUtils;
 
 /**
  * 
@@ -69,8 +79,34 @@ public abstract class GenericElasticsearchRepository<PO extends IdObject<String>
 	}
 
 	@Override
+	protected Builder buildUpdateByQueryRequestBuilderOnUpdateByQuery(U update, Q query) {
+		String json = JsonUtils.serialize(update);
+		Map<String, Object> map = JsonUtils.deserialize(json, Map.class);
+		Map<String, JsonData> params = map.entrySet().stream()
+				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> JsonData.of(entry.getValue())));
+
+		String source = params.entrySet().stream().map(entry -> {
+			return new StringBuilder(64).append("ctx._source.").append(entry.getKey()).append(" = params.")
+					.append(entry.getValue()).toString();
+		}).collect(Collectors.joining(";"));
+
+		InlineScript inlineScript = ScriptBuilders.inline()//
+				.lang(ScriptLanguage.Painless)//
+				.source(source).options(Collections.emptyMap()).params(params).build();
+
+		Script script = new Script.Builder().inline(inlineScript).build();
+
+		co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = buildQueryBuilder(query);
+		UpdateByQueryRequest.Builder result = new UpdateByQueryRequest.Builder()//
+				.index(getIndex())//
+				.query(queryBuilder.build())//
+				.script(script);
+		return result;
+	}
+
+	@Override
 	protected SearchRequest.Builder buildSearchRequestBuilderOnFindAll(Q query) {
-		//TODO 应该根据Q query实现查询条件，还有其他方法也类似
+		// TODO 应该根据Q query实现查询条件，还有其他方法也类似
 		return new SearchRequest.Builder().index(getIndex());
 	}
 
@@ -105,8 +141,10 @@ public abstract class GenericElasticsearchRepository<PO extends IdObject<String>
 
 	@Override
 	protected DeleteByQueryRequest.Builder buildDeleteByQueryRequestBuilderOnDeleteByQuery(Q query) {
-//		return new DeleteByQueryRequest.Builder().index(getIndex());
-		throw new UnsupportedOperationException("Please Impl buildDeleteByQueryRequestBuilderOnDeleteByQuery.");
+		co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = buildQueryBuilder(query);
+		DeleteByQueryRequest.Builder result = new DeleteByQueryRequest.Builder().index(getIndex())
+				.query(queryBuilder.build());
+		return result;
 	}
 
 	@Override

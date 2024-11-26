@@ -21,6 +21,8 @@ public interface Repository<PO, U, Q extends BaseQuery, W, DO, ID> {
 	int update(U update);
 
 	int updateBatch(Collection<U> updates);
+	
+	int updateByQuery(U update, Q query);
 
 	List<DO> findAll(Q query);
 

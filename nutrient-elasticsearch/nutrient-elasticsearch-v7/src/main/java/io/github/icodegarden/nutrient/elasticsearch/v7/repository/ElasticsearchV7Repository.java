@@ -41,6 +41,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
@@ -176,6 +177,18 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 				throw new BulkResponseHasErrorV7Exception("updateBatch Bulk had errors", response);
 			}
 			return updates.size();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	@Override
+	public int updateByQuery(U update, Q query) {
+		Tuple2<UpdateByQueryRequest, RequestOptions> tuple = buildUpdateByQueryRequest(update, query);
+		UpdateByQueryRequest updateByQueryRequest = tuple.getT1();
+		try {
+			BulkByScrollResponse response = client.updateByQuery(updateByQueryRequest, tuple.getT2());
+			return (int) response.getUpdated();
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -477,6 +490,8 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 	protected abstract Tuple2<UpdateRequest, RequestOptions> buildUpdateRequestOnUpdate(U update);
 
 	protected abstract Tuple2<BulkRequest, RequestOptions> buildBulkRequestOnUpdateBatch(Collection<U> updates);
+
+	protected abstract Tuple2<UpdateByQueryRequest, RequestOptions> buildUpdateByQueryRequest(U update, Q query);
 
 	protected abstract Tuple2<SearchRequest, RequestOptions> buildSearchRequestOnFindAll(Q query);
 

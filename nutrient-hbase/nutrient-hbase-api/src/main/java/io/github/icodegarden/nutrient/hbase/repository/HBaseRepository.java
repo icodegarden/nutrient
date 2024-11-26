@@ -121,6 +121,11 @@ public abstract class HBaseRepository<PO, U, Q extends HBaseQuery<W>, W, DO>
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	@Override
+	public int updateByQuery(U update, Q query) {
+		throw new UnsupportedOperationException();
+	}
 
 	protected abstract Put buildPutOnAdd(PO po);
 

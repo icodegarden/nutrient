@@ -43,6 +43,8 @@ import co.elastic.clients.elasticsearch.core.MgetRequest;
 import co.elastic.clients.elasticsearch.core.MgetResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryRequest;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryResponse;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.core.UpdateResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
@@ -185,7 +187,17 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	
+	@Override
+	public int updateByQuery(U update, Q query) {
+		UpdateByQueryRequest.Builder builder = buildUpdateByQueryRequestBuilderOnUpdateByQuery(update, query);
+
+		try {
+			UpdateByQueryResponse response = client.updateByQuery(builder.build());
+			return response.updated().intValue();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
 	@Override
 	public NextQuerySupportPage<DO> findAll(Q query) {
@@ -289,8 +301,6 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	
-
 	/**
 	 * 先根据id查index<br>
 	 * 如果没有则会404，接着若是aliasOfMultiIndex，则使用id term查，如果还是没有就确实不存在
@@ -379,8 +389,6 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	
-
 	@Override
 	public int delete(String id) {
 		try {
@@ -393,8 +401,6 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 		return 1;
 	}
-
-	
 
 	@Override
 	public int deleteBatch(Collection<String> ids) {
@@ -449,8 +455,6 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	
-
 	protected abstract IndexRequest.Builder<PO> buildIndexRequestBuilderOnAdd(PO po);
 
 	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnAddBatch(Collection<PO> pos);
@@ -458,6 +462,8 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 	protected abstract UpdateRequest.Builder<U, U> buildUpdateRequestBuilderOnUpdate(U update);
 
 	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnUpdateBatch(Collection<U> updates);
+
+	protected abstract UpdateByQueryRequest.Builder buildUpdateByQueryRequestBuilderOnUpdateByQuery(U update, Q query);
 
 	protected abstract SearchRequest.Builder buildSearchRequestBuilderOnFindAll(Q query);
 
@@ -472,7 +478,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnDeleteBatch(Collection<String> ids);
 
 	protected abstract DeleteByQueryRequest.Builder buildDeleteByQueryRequestBuilderOnDeleteByQuery(Q query);
-	
+
 	private void doUpdate(String index, U update) throws ElasticsearchException {
 		UpdateRequest.Builder<U, U> builder = buildUpdateRequestBuilderOnUpdate(update);
 		builder.index(index);
@@ -494,7 +500,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	/**
 	 * 不满足时自行覆盖
 	 * 
@@ -572,7 +578,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		queryBuilder.bool(boolBuilder.build());
 		return queryBuilder;
 	}
-	
+
 	/**
 	 * 文档可能存在于非最新索引，可以使用term查询还处于可读的索引（hot、warm、cold）
 	 * 
@@ -600,7 +606,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 		return null;
 	}
-	
+
 	private void doDelete(String index, String id) throws ElasticsearchException {
 		DeleteRequest.Builder builder = buildDeleteRequestBuilderOnDelete(id);
 		builder.index(index);
@@ -621,7 +627,7 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	/**
 	 * @param consumer<T> T 真实索引
 	 */

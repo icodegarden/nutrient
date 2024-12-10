@@ -235,8 +235,10 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 			builder.timeout(getReadTimeoutMillis() + "ms");
 
 			boolean isCount = PageUtils.isCount();
-			if (!isCount) {
+			if (isCount) {
 				// 是否进行count，count需要消耗一点性能
+				builder.trackTotalHits(b -> b.enabled(true));
+			} else {
 				builder.trackTotalHits(b -> b.enabled(false));
 			}
 

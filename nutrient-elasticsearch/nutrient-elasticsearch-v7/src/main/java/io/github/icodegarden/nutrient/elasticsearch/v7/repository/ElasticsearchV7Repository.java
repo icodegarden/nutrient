@@ -223,8 +223,10 @@ public abstract class ElasticsearchV7Repository<PO, U, Q extends ElasticsearchQu
 			searchSourceBuilder.timeout(new TimeValue(getReadTimeoutMillis(), TimeUnit.MILLISECONDS));
 
 			boolean isCount = PageUtils.isCount();
-			if (!isCount) {
+			if (isCount) {
 				// 是否进行count，count需要消耗一点性能
+				searchSourceBuilder.trackTotalHits(true);
+			} else {
 				searchSourceBuilder.trackTotalHits(false);
 			}
 

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.github.icodegarden</groupId>
 		<artifactId>nutrient-hbase</artifactId>
-		<version>3.0.1</version>
+		<version>3.0.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>nutrient-hbase-api</artifactId>
@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>io.github.icodegarden</groupId>
 			<artifactId>nutrient-lang</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.2</version>
 		</dependency>
 		
 		<!-- 原生hbase和alihabse存在个别的小冲突，需要2选1 -->

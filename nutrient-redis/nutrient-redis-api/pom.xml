@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.github.icodegarden</groupId>
 		<artifactId>nutrient-redis</artifactId>
-		<version>3.0.1</version>
+		<version>3.0.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>nutrient-redis-api</artifactId>
@@ -23,12 +23,12 @@
 		<dependency>
 			<groupId>io.github.icodegarden</groupId>
 			<artifactId>nutrient-lang</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.icodegarden</groupId>
 			<artifactId>nutrient-test</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.2</version>
 			<scope>test</scope>
 		</dependency>
 		

@@ -29,6 +29,11 @@ public class DemoHBaseRepository extends HBaseRepository<DemoPO, DemoPO, HBaseQu
 	}
 
 	@Override
+	public void increment(String id, String fieldName, long value) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	protected Put buildPutOnAdd(DemoPO po) {
 		Put put = new Put(Bytes.toBytes(po.getId()));
 		if (po.getVin() != null) {

@@ -38,6 +38,14 @@ public class ElasticsearchQuery<W> extends BaseQuery {
 	 * 需模糊匹配，且非分词类型的字段
 	 */
 	private Map<String, Object> wildcards;
+	
+	private List<String> exists;
+	
+	private List<String> notExists;
+	
+	private List<String> sourceExcludes;
+	
+	private List<String> sourceIncludes;
 
 	private List<Object> searchAfters;// exclude
 

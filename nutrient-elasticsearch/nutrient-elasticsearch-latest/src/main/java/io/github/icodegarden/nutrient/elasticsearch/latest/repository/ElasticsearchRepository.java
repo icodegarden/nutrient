@@ -3,6 +3,7 @@ package io.github.icodegarden.nutrient.elasticsearch.latest.repository;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,10 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.ErrorCause;
 import co.elastic.clients.elasticsearch._types.ErrorResponse;
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.InlineScript;
+import co.elastic.clients.elasticsearch._types.Script;
+import co.elastic.clients.elasticsearch._types.ScriptBuilders;
+import co.elastic.clients.elasticsearch._types.ScriptLanguage;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
@@ -38,6 +43,8 @@ import co.elastic.clients.elasticsearch.core.MgetRequest;
 import co.elastic.clients.elasticsearch.core.MgetResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryRequest;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryResponse;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.core.UpdateResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
@@ -66,7 +73,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuery<W>, W, DO>
 		extends ElasticsearchRepositorySupport<PO, U, Q, W, DO> {
 
-	private final ElasticsearchClient client;
+	protected final ElasticsearchClient client;
 //	private final ElasticsearchAsyncClient asyncClient;
 
 	public ElasticsearchRepository(ElasticsearchClient client, String index) {
@@ -180,23 +187,13 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
-	private void doUpdate(String index, U update) throws ElasticsearchException {
-		UpdateRequest.Builder<U, U> builder = buildUpdateRequestBuilderOnUpdate(update);
-		builder.index(index);
+	@Override
+	public int updateByQuery(U update, Q query) {
+		UpdateByQueryRequest.Builder builder = buildUpdateByQueryRequestBuilderOnUpdateByQuery(update, query);
+
 		try {
-			UpdateResponse<U> updateResponse = client.update(builder.build(), (Class) update.getClass());
-			if (updateResponse.shards().failed().intValue() > 0) {
-				throw new IllegalStateException(
-						"update failed, failed shards:" + updateResponse.shards().failed().intValue());
-			}
-		} catch (ElasticsearchException e) {
-			if (e.status() == 409) {// CONFLICT
-				/**
-				 * 通过id的更新，几乎不应该存在并发更新
-				 */
-				throw new IllegalStateException("conflict on update", e);
-			}
-			throw e;
+			UpdateByQueryResponse response = client.updateByQuery(builder.build());
+			return response.updated().intValue();
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -238,8 +235,10 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 			builder.timeout(getReadTimeoutMillis() + "ms");
 
 			boolean isCount = PageUtils.isCount();
-			if (!isCount) {
+			if (isCount) {
 				// 是否进行count，count需要消耗一点性能
+				builder.trackTotalHits(b -> b.enabled(true));
+			} else {
 				builder.trackTotalHits(b -> b.enabled(false));
 			}
 
@@ -302,70 +301,6 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	/**
-	 * 不满足时自行覆盖
-	 * 
-	 * @param query
-	 * @return
-	 */
-	protected co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder buildQueryBuilder(Q query) {
-		co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = new co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder();
-		BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
-
-		if (query.getTerms() != null) {
-			for (Entry<String, Object> entry : query.getTerms().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.term(b2 -> b2.field(entry.getKey()).value(entry.getValue().toString())));
-				}
-			}
-		}
-
-		if (query.getMatches() != null) {
-			for (Entry<String, Object> entry : query.getMatches().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.match(b2 -> b2.field(entry.getKey()).query(entry.getValue().toString())));
-				}
-			}
-		}
-
-		if (query.getMultiMatches() != null) {
-			for (Entry<Object, List<String>> entry : query.getMultiMatches().entrySet()) {
-				if (entry.getValue() != null) {
-					String value = entry.getValue().stream().collect(Collectors.joining(" "));
-					boolBuilder.must(b -> b.multiMatch(b2 -> b2.fields(entry.getKey().toString()).query(value)));
-				}
-			}
-		}
-
-		if (query.getRangeFroms() != null) {
-			for (Entry<String, Object> entry : query.getRangeFroms().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.range(b2 -> b2.field(entry.getKey()).gte(JsonData.of(entry.getValue()))));
-				}
-			}
-		}
-
-		if (query.getRangeTos() != null) {
-			for (Entry<String, Object> entry : query.getRangeTos().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b.range(b2 -> b2.field(entry.getKey()).lte(JsonData.of(entry.getValue()))));
-				}
-			}
-		}
-
-		if (query.getWildcards() != null) {
-			for (Entry<String, Object> entry : query.getWildcards().entrySet()) {
-				if (entry.getValue() != null) {
-					boolBuilder.must(b -> b
-							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("*%s*", entry.getValue()))));
-				}
-			}
-		}
-
-		queryBuilder.bool(boolBuilder.build());
-		return queryBuilder;
 	}
 
 	/**
@@ -456,6 +391,196 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		}
 	}
 
+	@Override
+	public int delete(String id) {
+		try {
+			doDelete(getIndex(), id);
+		} catch (ElasticsearchException e) {
+			LogUtils.warnIfEnabled(log,
+					() -> log.warn("Elasticsearch delete status is {}, index:{}, id:{}", e.status(), getIndex(), id));
+
+			doOnRealIndexIf404(getIndex(), id, e, realIndex -> doDelete(realIndex, id));
+		}
+		return 1;
+	}
+
+	@Override
+	public int deleteBatch(Collection<String> ids) {
+		if (CollectionUtils.isEmpty(ids)) {
+			return 0;
+		}
+
+		BulkRequest.Builder builder = buildBulkRequestBuilderOnDeleteBatch(ids);
+		try {
+			BulkResponse response = client.bulk(builder.build());
+			if (response.errors()) {
+				throw new BulkResponseHasErrorException("deleteBatch Bulk had errors", response);
+			}
+			return ids.size();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	@Override
+	public int deleteByQuery(Q query) {
+		Builder builder = buildDeleteByQueryRequestBuilderOnDeleteByQuery(query);
+
+		try {
+			DeleteByQueryResponse response = client.deleteByQuery(builder.build());
+			return response.deleted().intValue();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	@Override
+	public void increment(String id, String fieldName, long value) {
+		HashMap<String, JsonData> params = new HashMap<String, JsonData>(1);
+		params.put("value", JsonData.of(value));
+		InlineScript inlineScript = ScriptBuilders
+				.inline().lang(ScriptLanguage.Painless).source(new StringBuilder(64).append("ctx._source.")
+						.append(fieldName).append(" += params.value;").toString())
+				.options(Collections.emptyMap()).params(params).build();
+
+		Script script = new Script.Builder().inline(inlineScript).build();
+		UpdateRequest.Builder<U, U> builder = new UpdateRequest.Builder<U, U>().index(getIndex()).id(id);
+		builder.script(script);
+		try {
+			UpdateResponse<U> updateResponse = client.update(builder.build(), getClassU());
+			if (updateResponse.shards().failed().intValue() > 0) {
+				throw new IllegalStateException(
+						"update failed, failed shards:" + updateResponse.shards().failed().intValue());
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	protected abstract IndexRequest.Builder<PO> buildIndexRequestBuilderOnAdd(PO po);
+
+	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnAddBatch(Collection<PO> pos);
+
+	protected abstract UpdateRequest.Builder<U, U> buildUpdateRequestBuilderOnUpdate(U update);
+
+	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnUpdateBatch(Collection<U> updates);
+
+	protected abstract UpdateByQueryRequest.Builder buildUpdateByQueryRequestBuilderOnUpdateByQuery(U update, Q query);
+
+	protected abstract SearchRequest.Builder buildSearchRequestBuilderOnFindAll(Q query);
+
+	protected abstract CountRequest.Builder buildCountRequestBuilderOnCount(Q query);
+
+	protected abstract GetRequest.Builder buildGetRequestBuilderOnFindOne(String id, W with);
+
+	protected abstract MgetRequest.Builder buildMgetRequestBuilderOnFindByIds(List<String> ids, W with);
+
+	protected abstract DeleteRequest.Builder buildDeleteRequestBuilderOnDelete(String id);
+
+	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnDeleteBatch(Collection<String> ids);
+
+	protected abstract DeleteByQueryRequest.Builder buildDeleteByQueryRequestBuilderOnDeleteByQuery(Q query);
+
+	private void doUpdate(String index, U update) throws ElasticsearchException {
+		UpdateRequest.Builder<U, U> builder = buildUpdateRequestBuilderOnUpdate(update);
+		builder.index(index);
+		try {
+			UpdateResponse<U> updateResponse = client.update(builder.build(), (Class) update.getClass());
+			if (updateResponse.shards().failed().intValue() > 0) {
+				throw new IllegalStateException(
+						"update failed, failed shards:" + updateResponse.shards().failed().intValue());
+			}
+		} catch (ElasticsearchException e) {
+			if (e.status() == 409) {// CONFLICT
+				/**
+				 * 通过id的更新，几乎不应该存在并发更新
+				 */
+				throw new IllegalStateException("conflict on update", e);
+			}
+			throw e;
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * 不满足时自行覆盖
+	 * 
+	 * @param query
+	 * @return
+	 */
+	protected co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder buildQueryBuilder(Q query) {
+		co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder queryBuilder = new co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder();
+		BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
+
+		if (query.getTerms() != null) {
+			for (Entry<String, Object> entry : query.getTerms().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.filter(b -> b.term(b2 -> b2.field(entry.getKey()).value(entry.getValue().toString())));
+				}
+			}
+		}
+
+		if (query.getMatches() != null) {
+			for (Entry<String, Object> entry : query.getMatches().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.must(b -> b.match(b2 -> b2.field(entry.getKey()).query(entry.getValue().toString())));
+				}
+			}
+		}
+
+		if (query.getMultiMatches() != null) {
+			for (Entry<Object, List<String>> entry : query.getMultiMatches().entrySet()) {
+				if (entry.getValue() != null) {
+					String value = entry.getValue().stream().collect(Collectors.joining(" "));
+					boolBuilder.must(b -> b.multiMatch(b2 -> b2.fields(entry.getKey().toString()).query(value)));
+				}
+			}
+		}
+
+		if (query.getRangeFroms() != null) {
+			for (Entry<String, Object> entry : query.getRangeFroms().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).gte(JsonData.of(entry.getValue()))));
+				}
+			}
+		}
+
+		if (query.getRangeTos() != null) {
+			for (Entry<String, Object> entry : query.getRangeTos().entrySet()) {
+				if (entry.getValue() != null) {
+					boolBuilder.filter(b -> b.range(b2 -> b2.field(entry.getKey()).lte(JsonData.of(entry.getValue()))));
+				}
+			}
+		}
+
+		if (query.getWildcards() != null) {
+			for (Entry<String, Object> entry : query.getWildcards().entrySet()) {
+				if (entry.getValue() != null) {
+//					boolBuilder.must(b -> b
+//							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("*%s*", entry.getValue()))));
+					boolBuilder.must(b -> b
+							.wildcard(b2 -> b2.field(entry.getKey()).value(String.format("%s*", entry.getValue()))));// 最左匹配提升性能
+				}
+			}
+		}
+
+		if (query.getExists() != null) {
+			for (String fname : query.getExists()) {
+				boolBuilder.filter(b -> b.exists(b2 -> b2.field(fname)));
+			}
+		}
+
+		if (query.getNotExists() != null) {
+			for (String fname : query.getNotExists()) {
+				boolBuilder.mustNot(b -> b.exists(b2 -> b2.field(fname)));
+			}
+		}
+
+		queryBuilder.bool(boolBuilder.build());
+		return queryBuilder;
+	}
+
 	/**
 	 * 文档可能存在于非最新索引，可以使用term查询还处于可读的索引（hot、warm、cold）
 	 * 
@@ -484,19 +609,6 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		return null;
 	}
 
-	@Override
-	public int delete(String id) {
-		try {
-			doDelete(getIndex(), id);
-		} catch (ElasticsearchException e) {
-			LogUtils.warnIfEnabled(log,
-					() -> log.warn("Elasticsearch delete status is {}, index:{}, id:{}", e.status(), getIndex(), id));
-
-			doOnRealIndexIf404(getIndex(), id, e, realIndex -> doDelete(realIndex, id));
-		}
-		return 1;
-	}
-
 	private void doDelete(String index, String id) throws ElasticsearchException {
 		DeleteRequest.Builder builder = buildDeleteRequestBuilderOnDelete(id);
 		builder.index(index);
@@ -513,36 +625,6 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 				throw new IllegalStateException(
 						"delete failed, successful shards:" + deleteResponse.shards().successful().intValue());
 			}
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	@Override
-	public int deleteBatch(Collection<String> ids) {
-		if (CollectionUtils.isEmpty(ids)) {
-			return 0;
-		}
-
-		BulkRequest.Builder builder = buildBulkRequestBuilderOnDeleteBatch(ids);
-		try {
-			BulkResponse response = client.bulk(builder.build());
-			if (response.errors()) {
-				throw new BulkResponseHasErrorException("deleteBatch Bulk had errors", response);
-			}
-			return ids.size();
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	@Override
-	public int deleteByQuery(Q query) {
-		Builder builder = buildDeleteByQueryRequestBuilderOnDeleteByQuery(query);
-
-		try {
-			DeleteByQueryResponse response = client.deleteByQuery(builder.build());
-			return response.deleted().intValue();
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -583,26 +665,4 @@ public abstract class ElasticsearchRepository<PO, U, Q extends ElasticsearchQuer
 		 */
 		throw e;
 	}
-
-	protected abstract IndexRequest.Builder<PO> buildIndexRequestBuilderOnAdd(PO po);
-
-	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnAddBatch(Collection<PO> pos);
-
-	protected abstract UpdateRequest.Builder<U, U> buildUpdateRequestBuilderOnUpdate(U update);
-
-	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnUpdateBatch(Collection<U> updates);
-
-	protected abstract SearchRequest.Builder buildSearchRequestBuilderOnFindAll(Q query);
-
-	protected abstract CountRequest.Builder buildCountRequestBuilderOnCount(Q query);
-
-	protected abstract GetRequest.Builder buildGetRequestBuilderOnFindOne(String id, W with);
-
-	protected abstract MgetRequest.Builder buildMgetRequestBuilderOnFindByIds(List<String> ids, W with);
-
-	protected abstract DeleteRequest.Builder buildDeleteRequestBuilderOnDelete(String id);
-
-	protected abstract BulkRequest.Builder buildBulkRequestBuilderOnDeleteBatch(Collection<String> ids);
-
-	protected abstract DeleteByQueryRequest.Builder buildDeleteByQueryRequestBuilderOnDeleteByQuery(Q query);
 }

@@ -19,8 +19,10 @@ public interface Repository<PO, U, Q extends BaseQuery, W, DO, ID> {
 	}
 
 	int update(U update);
-	
+
 	int updateBatch(Collection<U> updates);
+	
+	int updateByQuery(U update, Q query);
 
 	List<DO> findAll(Q query);
 
@@ -33,6 +35,8 @@ public interface Repository<PO, U, Q extends BaseQuery, W, DO, ID> {
 	int delete(ID id);
 
 	int deleteBatch(Collection<ID> ids);
-	
+
 	int deleteByQuery(Q query);
+
+	void increment(ID id, String fieldName, long value);
 }

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.github.icodegarden</groupId>
 		<artifactId>nutrient-redis</artifactId>
-		<version>3.0.1</version>
+		<version>3.0.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>nutrient-redis-spring</artifactId>
@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>io.github.icodegarden</groupId>
 			<artifactId>nutrient-redis-api</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.2</version>
 		</dependency>
 		<dependency>
             <groupId>org.springframework.data</groupId>
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>io.github.icodegarden</groupId>
 			<artifactId>nutrient-redis-test</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.2</version>
 			<scope>test</scope>
 		</dependency>
 		

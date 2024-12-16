@@ -65,4 +65,4 @@
 
 # 3.0.2
 * 优化ES查询
-* ES如果page则trackTotalHits=true
+* shardingsphere升级最新5.4.1

@@ -41,7 +41,11 @@ public class ClientParameterMissingErrorCodeException extends ClientErrorCodeExc
 		/**
 		 * 其他参数
 		 */
-		MISSING_PARAMETER("client.missing-parameter", "Missing:parameter"),;
+		MISSING_PARAMETER("client.missing-parameter", "Missing:parameter"),
+		MISSING_PATH_VARIABLE("client.missing-path-variable", "Missing:path_variable"),
+		MISSING_REQUEST_PARAMETER("client.missing-request-parameter", "Missing:request_parameter"),
+		MISSING_REQUEST_HEADER("client.missing-request-header", "Missing:request_header"),
+		MISSING_REQUEST_COOKIE("client.missing-request-cookie", "Missing:request_cookie"),;
 
 		private final String sub_code;
 		private final String sub_msg;
